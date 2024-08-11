@@ -1,0 +1,20 @@
+export interface EmployeesParameters {
+  ID_OPERACION_CREAR_EMPLEADOS: string
+  ID_OPERACION_ACTUALIZAR_EMPLEADOS: string
+  ID_OPERACION_EDITAR_EMPLEADOS: string
+  ID_ROLES_EMPLEADOS: string
+  ID_ROLES_NO_EMPLEADOS: string
+  ID_OPERACION_CAMBIAR_ESTADO_EMPLEADOS: string
+}
+
+export interface TasksParameters {
+  ID_OPERACION_CREAR_TAREAS: string
+  ID_OPERACION_ACTUALIZAR_TAREAS: string
+  ID_OPERACION_EDITAR_TAREAS: string
+  ID_OPERACION_CAMBIAR_ESTADO_TAREAS: string
+}
+
+export interface GenericParameters {
+  ID_OPERACION_CREAR_EMPLEADOS: string
+  ID_OPERACION_CREAR_TAREAS: string
+}
