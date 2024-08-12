@@ -32,7 +32,6 @@ interface CustomFormProps extends FormProps {
 const CustomForm: React.FC<CustomFormProps> = ({
   autoComplete = "off",
   name = "custom-form",
-  layout = "horizontal",
   ...props
 }) => {
   return (
@@ -41,7 +40,6 @@ const CustomForm: React.FC<CustomFormProps> = ({
         autoComplete={autoComplete}
         name={name}
         validateMessages={validateMessages}
-        layout={layout}
         {...props}
       >
         {props.children}
