@@ -38,7 +38,7 @@ const Fallback: React.FC<FallbackProp> = ({
         <CustomSpin
           spinning
           size={"large"}
-          tip={<img width={"90%"} src={"/assets/svg/Text.svg"} />}
+          tip={<img width={"90%"} src={"/assets/text.svg"} />}
         />
       </CustomRow>
     </FallbackContainer>

@@ -357,7 +357,7 @@ const TaskList: React.FC = () => {
                           </CustomDivider>
                         }
                       >
-                        <CustomBadge overflowCount={9} count={filterCount}>
+                        <CustomBadge count={filterCount}>
                           <CustomButton
                             size={"large"}
                             type={"text"}

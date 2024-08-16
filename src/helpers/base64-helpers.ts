@@ -1,6 +1,8 @@
 import errorHandler from "./errorHandler"
 
 export function getBase64<T = string>(file: any): Promise<T> {
+  if (!file) return Promise.resolve("") as any
+
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
     reader.readAsDataURL(file?.originFileObj as any)

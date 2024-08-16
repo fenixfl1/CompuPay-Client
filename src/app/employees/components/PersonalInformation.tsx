@@ -13,6 +13,7 @@ import {
 } from "@/components/custom"
 import CustomInputGroup from "@/components/custom/CustomInputGroup"
 import { document_mask, passport_mask, phone_mask } from "@/constants/masks"
+import { normalizeMaskedInput } from "@/helpers/form-item-normalizers"
 import replaceAccentedVowels from "@/helpers/replaceAccentedVowels"
 import useUserStore from "@/stores/userStore"
 import {
@@ -23,6 +24,10 @@ import {
 import { Form, FormInstance } from "antd"
 import React, { useEffect, useMemo } from "react"
 
+const maskType = {
+  C: "cedula",
+  P: "pasaporte",
+}
 interface PersonalInformationProps {
   form: FormInstance
 }
@@ -30,6 +35,7 @@ interface PersonalInformationProps {
 const PersonalInformation: React.FC<PersonalInformationProps> = ({ form }) => {
   const name = Form.useWatch("NAME", form)
   const lastName = Form.useWatch("LAST_NAME", form)
+  const typeDocument = Form.useWatch("DOCUMENT_TYPE", form)
 
   const { user } = useUserStore()
 
@@ -98,13 +104,13 @@ const PersonalInformation: React.FC<PersonalInformationProps> = ({ form }) => {
                 noStyle
                 name={"IDENTITY_DOCUMENT"}
                 label={"Número de documento"}
+                noSymbol={typeDocument === "P"}
+                getValueFromEvent={
+                  typeDocument === "C" ? normalizeMaskedInput : undefined
+                }
               >
                 <CustomMaskedInput
-                  mask={(input) => {
-                    if (isNaN(Number(input))) return passport_mask
-
-                    return document_mask
-                  }}
+                  type={maskType[typeDocument as never] || "cedula"}
                   width={"80%"}
                   placeholder={"Documento de identidad"}
                 />
@@ -144,10 +150,11 @@ const PersonalInformation: React.FC<PersonalInformationProps> = ({ form }) => {
             onlyNumber
             label={"Teléfono"}
             name={"PHONE"}
+            getValueFromEvent={normalizeMaskedInput}
             rules={[{ required: true, max: 14 }]}
           >
             <CustomMaskedInput
-              mask={phone_mask}
+              type={"telefono"}
               placeholder={"Número de teléfono"}
             />
           </CustomFormItem>

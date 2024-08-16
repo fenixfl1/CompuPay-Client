@@ -39,7 +39,7 @@ const createSession = (data: SessionPayload): void => {
   })
   Cookies.set(
     sessionCookies.COOKIE_KEY_USER_DATA,
-    JSON.stringify({ ...userData, USERNAME, AVATAR }),
+    JSON.stringify({ ...userData, USERNAME, AVATAR, token }),
     {
       expires: new Date(expires),
     }

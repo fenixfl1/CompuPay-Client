@@ -60,7 +60,7 @@ const LoginForm: NextPage<LoginFormProps> = ({ onFinish, form, isFailed }) => {
       <CustomRow justify={"center"}>
         <CustomCol xs={16}>
           <CustomRow justify={"center"}>
-            <img width={"60%"} src="/assets/svg/logo 2.svg" alt="Logo" />
+            <img width={"60%"} src="/assets/logo_2.svg" alt="Logo" />
           </CustomRow>
         </CustomCol>
         <CustomCol xs={8}>
@@ -75,7 +75,7 @@ const LoginForm: NextPage<LoginFormProps> = ({ onFinish, form, isFailed }) => {
                   >
                     <CustomCol xs={24}>
                       <LoginLogoContainer>
-                        <img width={"100%"} src={"/assets/svg/Text.svg"} />
+                        <img width={"100%"} src={"/assets/text.svg"} />
                       </LoginLogoContainer>
                     </CustomCol>
                     <ConditionalComponent condition={isFailed}>

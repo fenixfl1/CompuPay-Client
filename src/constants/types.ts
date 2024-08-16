@@ -1,3 +1,5 @@
+import { Mask } from "react-text-mask"
+
 export type Theme = "light" | "dark"
 
 export type AnyType = any
@@ -46,3 +48,19 @@ export type ErrorCode =
   | "FT004"
   | "FT005"
   | "FT006"
+
+export type MaskType = {
+  pasaporte: Mask
+  cedula: Mask
+  telefono: Mask
+  telefono_internacional: Mask
+  phone_format: Mask
+  extension: Mask
+  rnc: Mask
+  meses: Mask
+  email: Mask
+  complete_phone: Mask
+  date: Mask
+  id_cuenta: Mask
+  cedula_rnc?: Mask
+}

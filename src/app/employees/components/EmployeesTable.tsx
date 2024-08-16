@@ -1,17 +1,23 @@
 import {
   CustomAvatar,
+  CustomBadge,
   CustomButton,
+  CustomCheckboxGroup,
   CustomCol,
+  CustomDatePicker,
   CustomDivider,
   CustomForm,
   CustomFormItem,
+  CustomInputNumber,
   CustomPopover,
+  CustomRangePicker,
   CustomRow,
   CustomSearch,
   CustomSelect,
   CustomSpace,
   CustomTable,
   CustomTag,
+  CustomText,
   CustomTooltip,
 } from "@/components/custom"
 import formatter from "@/helpers/formatter"
@@ -23,10 +29,16 @@ import {
   PlusOutlined,
 } from "@ant-design/icons"
 import { ColumnType, TablePaginationConfig } from "antd/lib/table"
-import React, { useContext, useEffect, useRef, useState } from "react"
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react"
 import styled from "styled-components"
 import EmployeeForm from "./EmployeeForm"
-import { Metadata } from "@/services/interfaces"
+import { AdvancedCondition, Metadata } from "@/services/interfaces"
 import randomHexColorCode from "@/helpers/random-hex-color-code"
 import useMenuOptionStore from "@/stores/useMenuOptionStore"
 import { EmployeesParameters } from "@/interfaces/parameters"
@@ -43,11 +55,64 @@ import useGetUser from "@/services/hooks/user/useGetUser"
 import { states } from "@/constants/general"
 import EmployeeProfile from "./EmployeeProfile"
 import useDrawerStore from "@/stores/drawerStore"
+import dayjs from "dayjs"
+import { FormInstance } from "antd/lib"
 
 const Tag = styled(CustomTag)`
   min-width: 70px;
   text-align: center !important;
 `
+
+const PopoverContainer = styled.div`
+  width: 300px;
+  max-height: 300px;
+  padding: 10px;
+  margin-bottom: 10px;
+  overflow-y: auto;
+`
+
+const optionStyles: React.CSSProperties = {
+  width: "100%",
+}
+
+const statusOptions = Object.keys(states).map((key) => ({
+  label: states[key].label,
+  value: key,
+  style: optionStyles,
+}))
+
+const searchOptions = [
+  {
+    label: "Nombre",
+    value: "NAME",
+    style: optionStyles,
+  },
+  {
+    label: "Apellido",
+    value: "LAST_NAME",
+    style: optionStyles,
+  },
+  {
+    label: "Cédula",
+    value: "IDENTIFICATION",
+    style: optionStyles,
+  },
+  {
+    label: "Usuario",
+    value: "USERNAME",
+    style: optionStyles,
+  },
+  {
+    label: "Correo",
+    value: "EMAIL",
+    style: optionStyles,
+  },
+  {
+    label: "Rol",
+    value: "roles__name",
+    style: optionStyles,
+  },
+]
 
 interface EditableCellProps {
   title: React.ReactNode
@@ -135,6 +200,8 @@ interface EmployeeTableProps {
   metadata: Metadata
   onChange?: (pagination: TablePaginationConfig) => void
   onSearch: (value: string) => void
+  form?: FormInstance
+  showFilter?: boolean
 }
 
 const EmployeesTable: React.FC<EmployeeTableProps> = ({
@@ -143,12 +210,18 @@ const EmployeesTable: React.FC<EmployeeTableProps> = ({
   metadata,
   onChange,
   onSearch,
+  showFilter = true,
+  form,
 }) => {
-  const [form] = Form.useForm()
+  const formValues = Form.useWatch([], form)
+
+  const [filterCount, setFilterCount] = useState(0)
+
   const { setOpenDrawer, open } = useDrawerStore()
   const { setVisible } = useModalStore()
   const { parameters } = useMenuOptionStore<EmployeesParameters>()
   const { roles } = useRolesStore()
+
   const { mutateAsync: getUser, isPending: getUserIsPending } = useGetUser()
   const { mutateAsync: changeUserState, isPending } = useChangeUserState()
 
@@ -162,6 +235,12 @@ const EmployeesTable: React.FC<EmployeeTableProps> = ({
   const allowChangeState = useIsAuthorized(
     Number(parameters?.ID_OPERACION_CAMBIAR_ESTADO_EMPLEADOS)
   )
+
+  useEffect(() => {
+    setFilterCount(
+      Object.keys(formValues ?? {}).filter((key) => formValues[key]).length
+    )
+  }, [formValues])
 
   const handleSave = async (record: User) => {
     try {
@@ -177,14 +256,108 @@ const EmployeesTable: React.FC<EmployeeTableProps> = ({
   }
 
   const popoverContent = (
-    <CustomSpace direction={"vertical"} size={5}>
-      <CustomButton type={"primary"} icon={<PlusOutlined />} block>
-        Agregar Empleado
-      </CustomButton>
-      <CustomButton type={"default"} block>
-        Importar Empleados
-      </CustomButton>
-    </CustomSpace>
+    <>
+      <PopoverContainer>
+        <CustomSpace>
+          <CustomCol xs={24}>
+            <CustomFormItem
+              layout="vertical"
+              name={"STATUS"}
+              label={<CustomText strong>Estado</CustomText>}
+            >
+              <CustomCheckboxGroup options={statusOptions} />
+            </CustomFormItem>
+          </CustomCol>
+          <CustomCol xs={24}>
+            <CustomFormItem
+              layout="vertical"
+              label={<CustomText strong>Rango salarial</CustomText>}
+            >
+              <CustomSpace direction="horizontal">
+                <CustomFormItem name={"MIN_SALARY"} noStyle initialValue={0}>
+                  <CustomInputNumber
+                    format={{ format: "currency", currency: "RD" }}
+                    placeholder={"Mínimo"}
+                    width={100}
+                  />
+                </CustomFormItem>
+                <CustomFormItem name={"MAX_SALARY"} noStyle>
+                  <CustomInputNumber
+                    format={{ format: "currency", currency: "RD" }}
+                    placeholder={"Máximo"}
+                    width={100}
+                  />
+                </CustomFormItem>
+              </CustomSpace>
+            </CustomFormItem>
+          </CustomCol>
+          <CustomCol xs={24}>
+            <CustomFormItem
+              label={
+                <CustomText strong>Rango Fecha de contratación</CustomText>
+              }
+              layout="vertical"
+              name={"RANGE_DATE"}
+            >
+              <CustomRangePicker
+                maxDate={dayjs()}
+                placeholder={["Fecha Inicial", "Fecha Final"]}
+              />
+            </CustomFormItem>
+          </CustomCol>
+          <CustomCol xs={24}>
+            <CustomFormItem
+              layout="vertical"
+              label={<CustomText strong>Roles</CustomText>}
+              name={"ROLES"}
+            >
+              <CustomSelect
+                mode={"multiple"}
+                placeholder={"Seleccionar roles"}
+                options={roles.map((rol) => ({
+                  label: rol.NAME,
+                  value: rol.ROL_ID,
+                }))}
+              />
+            </CustomFormItem>
+          </CustomCol>
+          <CustomCol xs={24}>
+            <CustomFormItem
+              layout="vertical"
+              name={"SEARCH_OPTIONS"}
+              label={<CustomText strong>Buscar por</CustomText>}
+              labelCol={{ span: 24 }}
+            >
+              <CustomSelect
+                placeholder={"Seleccionar opciones"}
+                options={searchOptions}
+                mode={"multiple"}
+              />
+            </CustomFormItem>
+          </CustomCol>
+        </CustomSpace>
+      </PopoverContainer>
+      <CustomCol xs={24}>
+        <CustomRow justify={"space-between"}>
+          <CustomButton
+            type={"link"}
+            onClick={() => {
+              form?.resetFields()
+              onSearch?.("")
+            }}
+          >
+            Restablecer filtros
+          </CustomButton>
+          <CustomButton
+            type={"primary"}
+            icon={<FilterOutlined />}
+            onClick={() => onSearch?.(formValues?.SEARCH)}
+          >
+            Aplicar filtros
+          </CustomButton>
+        </CustomRow>
+      </CustomCol>
+    </>
   )
 
   const columns: CustomColumnType<User>[] = [
@@ -339,29 +512,35 @@ const EmployeesTable: React.FC<EmployeeTableProps> = ({
   return (
     <>
       <CustomCol xs={24}>
-        <CustomRow justify={"space-between"} gap={15}>
-          <CustomTooltip title={"Filtros"} placement={"left"}>
-            <CustomPopover
-              title={"Filtros"}
-              content={popoverContent}
-              trigger={"click"}
-            >
-              <CustomButton
-                size={"large"}
-                type={"text"}
-                icon={<FilterOutlined />}
-              />
-            </CustomPopover>
-          </CustomTooltip>
-          <CustomCol xs={24} sm={18} md={16} lg={12} xl={8}>
-            <CustomSearch
-              onChange={({ target }) => onSearch(target.value)}
-              onSearch={onSearch}
-              placeholder={"Buscar empleados"}
-            />
-          </CustomCol>
-          <CustomCol xs={24}>
-            <CustomForm form={form} component={false}>
+        <CustomForm form={form} component={false}>
+          <CustomRow justify={"space-between"} gap={15}>
+            <ConditionalComponent condition={showFilter}>
+              <CustomTooltip title={"Filtros"} placement={"left"}>
+                <CustomPopover
+                  title={"Filtros"}
+                  content={popoverContent}
+                  trigger={"click"}
+                >
+                  <CustomBadge count={filterCount}>
+                    <CustomButton
+                      size={"large"}
+                      type={"text"}
+                      icon={<FilterOutlined />}
+                    />
+                  </CustomBadge>
+                </CustomPopover>
+              </CustomTooltip>
+            </ConditionalComponent>
+            <CustomCol xs={24} sm={18} md={16} lg={12} xl={8}>
+              <CustomFormItem noStyle name={"SEARCH"}>
+                <CustomSearch
+                  onChange={({ target }) => onSearch(target.value)}
+                  onSearch={onSearch}
+                  placeholder={"Buscar empleados"}
+                />
+              </CustomFormItem>
+            </CustomCol>
+            <CustomCol xs={24}>
               <CustomTable
                 loading={loading || isPending}
                 dataSource={dataSource}
@@ -375,9 +554,9 @@ const EmployeesTable: React.FC<EmployeeTableProps> = ({
                   showSizeChanger: true,
                 }}
               />
-            </CustomForm>
-          </CustomCol>
-        </CustomRow>
+            </CustomCol>
+          </CustomRow>
+        </CustomForm>
       </CustomCol>
 
       <EmployeeForm loading={getUserIsPending} />

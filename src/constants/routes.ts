@@ -24,3 +24,16 @@ export const PATH_TASKS = "/tasks"
 export const PATH_PAYROLL = "/payroll"
 export const PATH_HELP = "/help"
 export const PATH_SETTINGS = "/settings"
+export const PATH_EMPLOYEES = "/employees"
+
+export const protectedRoutes = [
+  PATH_HOME,
+  PATH_DASHBOARD,
+  PATH_TASKS,
+  PATH_PAYROLL,
+  PATH_HELP,
+  PATH_SETTINGS,
+  PATH_EMPLOYEES,
+]
+
+export const publicRoutes = [PATH_LOGIN]

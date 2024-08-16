@@ -64,13 +64,13 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ loading }) => {
 
     form.setFieldsValue({
       ...user,
-      ROLES: roles.find((rol) => rol.NAME === `${user?.ROLES?.[0]}`)
-        ?.ROL_ID as never,
+      ROLES: user.ROLES?.[0].ROL_ID as never,
       HIRED_DATE: dayjs(user?.HIRED_DATE) as any,
       RESUME: user?.RESUME
         ? (createUploadObject(user?.RESUME ?? "", user) as any)
         : undefined,
       SALARY: user?.GROSS_SALARY,
+      GENDER: user.GENDER,
     })
   }, [user])
 
@@ -104,14 +104,20 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ loading }) => {
       assert<dayjs.Dayjs>(data.HIRED_DATE)
       assert<File[]>(data.RESUME)
 
+      data.RESUME = await getBase64(data.RESUME?.[0])
+      data.ROLES = [data.ROLES] as never
+      data.HIRED_DATE = data.HIRED_DATE.format("YYYY-MM-DD")
+      data.STATE = roles.find(
+        (rol) => rol.ROL_ID === (data.ROLES as unknown as number)
+      )?.INIT_USER_STATE as string
+
       if (user?.USER_ID) {
-        delete data.ROLES
-        delete data.RESUME
+        delete data.IDENTITY_DOCUMENT
+        delete data.USERNAME
 
         await updateUser({
           ...data,
           USER_ID: user.USER_ID,
-          HIRED_DATE: data.HIRED_DATE.format("YYYY-MM-DD"),
         })
         setVisible(false)
         return customNotification({
@@ -120,13 +126,6 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ loading }) => {
         })
       }
 
-      data.RESUME = await getBase64(data.RESUME[0])
-      data.HIRED_DATE = data.HIRED_DATE.format("YYYY-MM-DD")
-      data.STATE = roles.find(
-        (rol) => rol.ROL_ID === (data.ROLES as unknown as number)
-      )?.INIT_USER_STATE as string
-      data.ROLES = [data.ROLES] as never
-
       await createUser(data as User)
       customNotification({
         type: "success",
@@ -134,17 +133,12 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ loading }) => {
       })
       setVisible(false)
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.log({ error })
       errorHandler(error)
     }
   }
 
   const handleOnClickNext = async () => {
     try {
-      if (user?.USER_ID) {
-        return setCurrentStep(currentStep + 1)
-      }
       const data = await form.validateFields()
       setEmployee((prev) => ({ ...prev, ...data }))
       setCurrentStep(currentStep + 1)

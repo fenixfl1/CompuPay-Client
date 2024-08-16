@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect } from "react"
+import React, { useEffect, useTransition } from "react"
 import CustomLayout from "./custom/CustomLayout"
 import styled from "styled-components"
 import {
@@ -49,6 +49,7 @@ import useIsAuthorized from "@/hooks/useIsAuthorized"
 import { GenericParameters } from "@/interfaces/parameters"
 import { assert } from "@/helpers/assert"
 import EmployeeProfile from "@/app/employees/components/EmployeeProfile"
+import Fallback from "./Fallback"
 
 const LogoContainer = styled.div`
   height: 75px;
@@ -139,6 +140,7 @@ interface RouteWrapperProps {
 
 const RouteWrapper: React.FC<RouteWrapperProps> = (props) => {
   const router = useRouter()
+  const [isPending, startTransition] = useTransition()
   const { setOpenDrawer, open } = useDrawerStore()
   const { setVisible } = useModalStore()
   const { parameters, menuOptions, setSelectedMenuOption, setParameters } =
@@ -160,26 +162,12 @@ const RouteWrapper: React.FC<RouteWrapperProps> = (props) => {
     setParameters(getSelectedOption()?.parameters)
   }, [menuOptions])
 
-  useEffect(() => {
-    if (!isLoggedIn() && window.location.pathname !== "/login") {
-      const { pathname } = window.location
-      let path = PATH_LOGIN
-      if (pathname !== "/") {
-        path = `${path}?next=${pathname}`
-      }
-
-      redirect(path)
-    }
-  }, [])
-
   const handleLogout = () => {
     CustomModalConfirmation({
       title: "Cerrar Sesión",
       content: "¿Estás seguro que deseas cerrar sesión?",
       onOk: async () => {
         removeSession()
-        router.push(PATH_LOGIN)
-        await sleep(200)
         window.location.reload()
       },
     })
@@ -188,7 +176,9 @@ const RouteWrapper: React.FC<RouteWrapperProps> = (props) => {
   const handleOnSelect = (item: MenuOption) => {
     setSelectedMenuOption(item)
     setParameters(item.parameters)
-    router.push(item.path)
+    startTransition(() => {
+      router.push(item.path)
+    })
   }
 
   const items: ItemType[] = menuOptions.map(({ icon, ...item }) => ({
@@ -212,7 +202,7 @@ const RouteWrapper: React.FC<RouteWrapperProps> = (props) => {
                 setSelectedMenuOption({} as MenuOption)
               }}
             >
-              <img width={"85%"} src={"/assets/svg/Logo 1.svg"} />
+              <img width={"85%"} src={"/assets/logo_1.svg"} />
             </LogoContainer>
             <CustomRow>
               <UserContainer
@@ -304,11 +294,16 @@ const RouteWrapper: React.FC<RouteWrapperProps> = (props) => {
             </CustomHeader>
             <Content>
               <CustomContentContainer>
-                <MotionComponent key={location.pathname}>
-                  <CustomSpin spinning={isUserPending}>
-                    {props.children}
-                  </CustomSpin>
-                </MotionComponent>
+                <ConditionalComponent
+                  condition={!isPending}
+                  // fallback={<Fallback />}
+                >
+                  <MotionComponent key={isPending ? 1 : 0}>
+                    <CustomSpin spinning={isUserPending}>
+                      {props.children}
+                    </CustomSpin>
+                  </MotionComponent>
+                </ConditionalComponent>
               </CustomContentContainer>
             </Content>
           </ContentLayout>

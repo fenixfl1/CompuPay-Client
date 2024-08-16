@@ -21,6 +21,7 @@ export type QueryOperators =
   | "IN"
   | "NOT IN"
   | "IS NULL"
+  | "BETWEEN"
 
 export interface Condition<T> {
   condition: { [P in keyof Partial<T>]: T[P] }

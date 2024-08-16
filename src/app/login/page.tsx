@@ -1,7 +1,7 @@
 "use client"
 
 import { Form } from "antd"
-import LoginForm from "./Components/LoginForm"
+import LoginForm from "./_components/LoginForm"
 import { NextPage } from "next"
 import { useAuthenticateUser } from "@/services/hooks"
 import { CustomSpin } from "@/components/custom"
@@ -19,26 +19,12 @@ const page: NextPage = () => {
     isError,
   } = useAuthenticateUser()
 
-  useEffect(() => {
-    if (isLoggedIn())
-      router.push(
-        new URLSearchParams(window.location.search).get("next") || PATH_HOME
-      )
-  }, [])
-
   const handleOnFinish = async () => {
     try {
       const data = await form.validateFields()
       const response = await authenticateUser(data)
       createSession(response)
-      const next =
-        new URLSearchParams(window.location.search).get("next") || PATH_HOME
-
-      if (next !== PATH_HOME) {
-        router.push(next)
-      } else {
-        window.location.reload()
-      }
+      window.location.reload()
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error({ error })

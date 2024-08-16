@@ -5,10 +5,16 @@ import { defaultTheme } from "@/styles/themes"
 const CustomBadge: React.FC<BadgeProps> = ({
   size = defaultTheme.size,
   showZero = false,
+  overflowCount = 9,
   ...props
 }) => {
   return (
-    <Badge size={size as never} showZero={showZero} {...props}>
+    <Badge
+      overflowCount={overflowCount}
+      size={size as never}
+      showZero={showZero}
+      {...props}
+    >
       {props.children}
     </Badge>
   )

@@ -10,33 +10,22 @@ interface MotionComponentProps {
 
 const MotionComponent: React.FC<MotionComponentProps> = ({
   delay = 1,
-  mode = "sync",
-  key,
   ...props
 }) => {
-  const pageVariants = {
-    initial: { opacity: 0 },
-    animate: { opacity: 1 },
-    exit: { opacity: 0 },
-  }
-
-  const pageTransition = {
+  const transition = {
     duration: delay,
   }
 
   return (
-    <AnimatePresence initial presenceAffectsLayout mode={mode}>
-      <motion.div
-        key={key}
-        initial="initial"
-        animate="animate"
-        exit="exit"
-        variants={pageVariants}
-        transition={pageTransition}
-      >
-        {props.children}
-      </motion.div>
-    </AnimatePresence>
+    <motion.div
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -20 }}
+      transition={transition}
+      {...props}
+    >
+      {props.children}
+    </motion.div>
   )
 }
 

@@ -1,5 +1,6 @@
 {
     "cSpell.words": [
+        "cedula",
         "cssinjs",
         "dayjs",
         "ILIKE",
@@ -7,9 +8,11 @@
         "payflow",
         "popover",
         "Popover",
+        "rolesusers",
         "Segoe",
         "Simbolo",
         "tanstack",
+        "telefono",
         "zustand"
     ]
 }

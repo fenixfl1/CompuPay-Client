@@ -169,7 +169,11 @@ const EmploymentData: React.FC<EmploymentDataProps> = ({ form }) => {
             </CustomFormItem>
           </CustomCol>
           <CustomCol {...defaultBreakpoints}>
-            <CustomFormItem label={"Rol"} name={"ROLES"}>
+            <CustomFormItem
+              label={"Rol"}
+              name={"ROLES"}
+              rules={[{ required: true }]}
+            >
               <CustomSelect
                 placeholder={"Seleccionar Cargo"}
                 options={data?.map((item) => ({
