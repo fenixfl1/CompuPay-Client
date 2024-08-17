@@ -14,6 +14,7 @@ import { EditOutlined, PlusOutlined } from "@ant-design/icons"
 import React, { useState } from "react"
 import styled from "styled-components"
 import TagForm from "./TagForm"
+import ConditionalComponent from "@/components/ConditionalComponent"
 
 const StyledTag = styled(CustomTag)`
   width: 210px !important;
@@ -118,11 +119,13 @@ const TagsList: React.FC<TagListProps> = ({
         </CustomRow>
       </CustomModal>
 
-      <TagForm
-        open={showTagForm}
-        onClose={() => setShowTagForm(false)}
-        tag={selectedTag}
-      />
+      <ConditionalComponent condition={showTagForm}>
+        <TagForm
+          open={showTagForm}
+          onClose={() => setShowTagForm(false)}
+          tag={selectedTag}
+        />
+      </ConditionalComponent>
     </>
   )
 }

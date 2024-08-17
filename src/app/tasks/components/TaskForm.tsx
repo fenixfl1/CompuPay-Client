@@ -50,6 +50,13 @@ const TaskForm: React.FC = () => {
   }))
 
   useEffect(() => {
+    return () => {
+      form.resetFields()
+      setSelectedTags([])
+    }
+  }, [])
+
+  useEffect(() => {
     getUser({
       page: 1,
       size: 15,
