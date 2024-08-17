@@ -218,7 +218,7 @@ const EmployeesTable: React.FC<EmployeeTableProps> = ({
   const [filterCount, setFilterCount] = useState(0)
 
   const { setOpenDrawer, open } = useDrawerStore()
-  const { setVisible } = useModalStore()
+  const { setVisible, visible } = useModalStore()
   const { parameters } = useMenuOptionStore<EmployeesParameters>()
   const { roles } = useRolesStore()
 
@@ -559,7 +559,9 @@ const EmployeesTable: React.FC<EmployeeTableProps> = ({
         </CustomForm>
       </CustomCol>
 
-      <EmployeeForm loading={getUserIsPending} />
+      <ConditionalComponent condition={visible}>
+        <EmployeeForm loading={getUserIsPending} />
+      </ConditionalComponent>
       <ConditionalComponent condition={open}>
         <EmployeeProfile />
       </ConditionalComponent>

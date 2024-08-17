@@ -46,8 +46,12 @@ function errorHandler(error: any, useServerMessage = true): void {
         ? error.message
         : ERROR_MESSAGES[error.name as ErrorName]?.message
   } else {
-    ERROR_CODE = errorCode ? `${error_code}_${errorCode}` : error_code
-    alert_msg = errorMessage as string
+    const data = error.response?.data
+    ERROR_CODE = data?.["code" as never] as unknown as string
+    alert_msg = (data?.error ??
+      data?.message ??
+      data?.["detail" as never] ??
+      "") as string
   }
 
   // eslint-disable-next-line no-console
@@ -57,13 +61,13 @@ function errorHandler(error: any, useServerMessage = true): void {
     ${alert_msg}
     <br />
     <br /> 
-    <strong>Código: <code>${code}</code></strong> 
+    <strong>Código: <code>${code ?? "BK001"}</code></strong> 
   `
 
   customNotification({
     description,
     title,
-    type,
+    type: "warning",
   } as never)
 }
 

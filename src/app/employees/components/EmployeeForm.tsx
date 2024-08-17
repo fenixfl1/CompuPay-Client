@@ -85,6 +85,15 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ loading }) => {
     }
   }, [visible])
 
+  useEffect(() => {
+    return () => {
+      form.resetFields()
+      setCurrentStep(0)
+      setEmployee({} as User)
+      setUser({} as User)
+    }
+  }, [])
+
   const steps = [
     {
       key: "personal_information",
