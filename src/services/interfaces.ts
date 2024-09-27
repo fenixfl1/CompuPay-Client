@@ -24,6 +24,7 @@ export type QueryOperators =
   | "BETWEEN"
 
 export interface Condition<T> {
+  fields?: "__all__" | Array<keyof T>
   condition: { [P in keyof Partial<T>]: T[P] }
 }
 
@@ -37,11 +38,12 @@ export interface AdvancedCondition<T = any> {
 export interface ReturnPayload<T> {
   data: T
   metadata: Metadata
-  message?: string
+  message: string
 }
 
-export interface GetPayload<T = AdvancedCondition[]> {
-  condition: T
+export interface GetPayload<T = any> {
+  fields?: (keyof T)[]
+  condition: AdvancedCondition<T>[]
   page: number
   size: number
 }

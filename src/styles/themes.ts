@@ -47,7 +47,7 @@ export const defaultTheme: DefaultTheme = {
   baseBgColor: colors.baseBackground,
   backgroundColor: colors.baseBackground,
   textColor: colors.secondaryBgColor,
-  borderRadius: "10px",
+  borderRadius: "8px",
   borderColor: colors.border,
   colorPrimaryHover: "#f9f0ff",
   colorPrimaryText: "#9254de",
@@ -79,14 +79,15 @@ export const panelStyle: React.CSSProperties = {
   border: "none",
 }
 
-const { defaultConfig } = theme
+const { defaultConfig, compactAlgorithm } = theme
 
 export const antTheme: ThemeConfig = {
   ...defaultConfig,
   token: {
-    borderRadius: 8,
+    borderRadius: 5,
     colorPrimary: colors.primary,
   },
+  algorithm: [compactAlgorithm],
   components: {
     Menu: {
       lineWidth: 0,
@@ -104,6 +105,14 @@ export const antTheme: ThemeConfig = {
     },
     Badge: {
       marginXS: 5,
+    },
+    Button: {
+      primaryShadow: undefined,
+      defaultShadow: undefined,
+      dangerShadow: undefined,
+    },
+    Table: {
+      bodySortBg: "#3869a1",
     },
   },
 }

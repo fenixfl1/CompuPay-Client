@@ -11,7 +11,7 @@ export const DEFAULT_ACTIVE_COLOR = ""
 export const DEFAULT_FOCUS_COLOR = ""
 export const WARNING_COLOR = "#f0c954"
 export const DANGER_COLOR = "#ff4d4f"
-export const SUCCESS_COLOR = "#3bcaa7"
+export const SUCCESS_COLOR = "#f0f4f6"
 export const INFO_COLOR = ""
 export const SECONDARY_BG_COLOR = "#f5f5f5"
 

@@ -9,7 +9,7 @@ const initialData: ReturnPayload<Roles[]> = {
   data: [],
   metadata: {
     page: 1,
-    page_size: 5,
+    page_size: 10,
     total: 0,
     next_page: 1,
     previous_page: "",

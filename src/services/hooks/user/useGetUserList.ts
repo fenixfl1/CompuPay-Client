@@ -9,7 +9,7 @@ const initialData: ReturnPayload<User[]> = {
   data: [],
   metadata: {
     page: 1,
-    page_size: 5,
+    page_size: 10,
     total: 0,
     next_page: 1,
     previous_page: "",
@@ -19,19 +19,19 @@ const initialData: ReturnPayload<User[]> = {
 export function useGetUserLIst() {
   const { setUsers, setMetadata } = useUserStore()
 
-  return useCustomMutation<ReturnPayload<User[]>, GetPayload>({
+  return useCustomMutation<ReturnPayload<User[]>, GetPayload<User>>({
     initialData,
     mutationKey: ["users", "get-user-list"],
     onSuccess: ({ data, metadata }) => {
       setUsers(data)
       setMetadata(metadata)
     },
-    mutationFn: async ({ condition, page, size }) => {
+    mutationFn: async ({ condition, page, size, fields }) => {
       const {
         data: { data, metadata, message },
       } = await postRequest<User[]>(
         `${WEB_API_GET_USER_LIST}?page=${page}&page_size=${size}`,
-        { condition }
+        { condition, fields }
       )
 
       return { data, metadata, message }

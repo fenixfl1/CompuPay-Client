@@ -17,4 +17,5 @@ export interface TasksParameters {
 export interface GenericParameters {
   ID_OPERACION_CREAR_EMPLEADOS: string
   ID_OPERACION_CREAR_TAREAS: string
+  ID_OPERACION_CREAR_NOMINA: string
 }

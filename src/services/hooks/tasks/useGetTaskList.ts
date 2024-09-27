@@ -10,6 +10,7 @@ import {
 import useTaskStore from "@/stores/taskStore"
 
 const initialData: ReturnPayload<Task[]> = {
+  message: "",
   data: [],
   metadata: {
     page: 1,

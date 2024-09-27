@@ -4,7 +4,7 @@ import { create } from "zustand"
 
 const initialMetadata: Metadata = {
   page: 1,
-  page_size: 5,
+  page_size: 10,
   total: 0,
   next_page: 0,
 }

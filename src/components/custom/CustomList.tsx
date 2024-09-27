@@ -7,14 +7,15 @@ interface CustomListProps<T> extends ListProps<T> {
 
 const CustomList: React.FC<CustomListProps<any>> = ({
   size = "small",
-  pagination,
+  itemLayout = "horizontal",
   pageSizeOptions = ["5", "10", "20", "50", "100"],
   ...props
 }) => {
   return (
     <List
+      itemLayout={itemLayout}
+      pagination={{ pageSizeOptions, ...props.pagination }}
       size={size}
-      pagination={{ ...pagination, pageSizeOptions }}
       {...props}
     />
   )

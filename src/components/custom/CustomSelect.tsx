@@ -9,11 +9,13 @@ interface CustomSelectProps extends SelectProps {
 const CustomSelect: React.FC<CustomSelectProps> = ({
   optionLabelProp = "label",
   size = defaultTheme.size,
+  showSearch = true,
   width,
   ...props
 }) => {
   return (
     <Select
+      showSearch={showSearch}
       size={size}
       optionLabelProp={optionLabelProp}
       filterOption={(input, option) => {

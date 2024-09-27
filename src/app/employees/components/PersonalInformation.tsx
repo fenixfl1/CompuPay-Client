@@ -6,14 +6,17 @@ import {
   CustomFormItem,
   CustomInput,
   CustomSelect,
-  CustomPasswordInput,
   CustomRadioGroup,
   CustomMaskedInput,
   CustomTextArea,
+  CustomUpload,
+  CustomDatePicker,
 } from "@/components/custom"
 import CustomInputGroup from "@/components/custom/CustomInputGroup"
-import { document_mask, passport_mask, phone_mask } from "@/constants/masks"
-import { normalizeMaskedInput } from "@/helpers/form-item-normalizers"
+import {
+  normalizeFiles,
+  normalizeMaskedInput,
+} from "@/helpers/form-item-normalizers"
 import replaceAccentedVowels from "@/helpers/replaceAccentedVowels"
 import useUserStore from "@/stores/userStore"
 import {
@@ -22,6 +25,7 @@ import {
   labelColFullWidth,
 } from "@/styles/breakpoints"
 import { Form, FormInstance } from "antd"
+import dayjs from "dayjs"
 import React, { useEffect, useMemo } from "react"
 
 const maskType = {
@@ -105,6 +109,7 @@ const PersonalInformation: React.FC<PersonalInformationProps> = ({ form }) => {
                 name={"IDENTITY_DOCUMENT"}
                 label={"Número de documento"}
                 noSymbol={typeDocument === "P"}
+                rules={[{ required: true, len: 11 }]}
                 getValueFromEvent={
                   typeDocument === "C" ? normalizeMaskedInput : undefined
                 }
@@ -151,7 +156,7 @@ const PersonalInformation: React.FC<PersonalInformationProps> = ({ form }) => {
             label={"Teléfono"}
             name={"PHONE"}
             getValueFromEvent={normalizeMaskedInput}
-            rules={[{ required: true, max: 14 }]}
+            rules={[{ required: true, len: 10 }]}
           >
             <CustomMaskedInput
               type={"telefono"}
@@ -170,17 +175,6 @@ const PersonalInformation: React.FC<PersonalInformationProps> = ({ form }) => {
           </CustomFormItem>
         </CustomCol>
         <CustomCol {...defaultBreakpoints}>
-          <ConditionalComponent condition={!user.USER_ID}>
-            <CustomFormItem
-              label={"Contraseña"}
-              name={"PASSWORD"}
-              rules={[{ required: true }]}
-            >
-              <CustomPasswordInput placeholder={"Contraseña"} />
-            </CustomFormItem>
-          </ConditionalComponent>
-        </CustomCol>
-        <CustomCol {...defaultBreakpoints}>
           <CustomFormItem
             onlyString
             label={"Género"}
@@ -195,6 +189,15 @@ const PersonalInformation: React.FC<PersonalInformationProps> = ({ form }) => {
             />
           </CustomFormItem>
         </CustomCol>
+        <CustomCol {...defaultBreakpoints}>
+          <CustomFormItem
+            label={"Fecha Nacimiento"}
+            name={"BIRTH_DATE"}
+            rules={[{ required: true }]}
+          >
+            <CustomDatePicker maxDate={dayjs().subtract(15, "year")} />
+          </CustomFormItem>
+        </CustomCol>
         <CustomCol xs={24}>
           <CustomFormItem
             label={"Dirección"}
@@ -204,6 +207,27 @@ const PersonalInformation: React.FC<PersonalInformationProps> = ({ form }) => {
             <CustomTextArea placeholder={"Dirección"} />
           </CustomFormItem>
         </CustomCol>
+        {/* <ConditionalComponent condition={!user.USER_ID}> */}
+        <CustomCol {...defaultBreakpoints}>
+          <CustomFormItem
+            label={"Foto de Perfil"}
+            name={"AVATAR"}
+            getValueFromEvent={normalizeFiles}
+            valuePropName={"fileList"}
+          >
+            <CustomUpload
+              fileList={
+                [
+                  {
+                    url: "https://static.vecteezy.com/system/resources/previews/006/487/917/original/man-avatar-icon-free-vector.jpg",
+                  },
+                ] as never
+              }
+              accept={"image/*"}
+            />
+          </CustomFormItem>
+        </CustomCol>
+        {/* </ConditionalComponent> */}
       </CustomRow>
     </CustomForm>
   )

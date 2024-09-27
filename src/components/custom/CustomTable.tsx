@@ -9,7 +9,10 @@ export interface CustomColumnType<T> extends ColumnType<T> {
 }
 
 const CustomTable = React.forwardRef<any, TableProps<any>>(
-  ({ bordered = false, size = defaultTheme.size, ...props }, ref) => {
+  (
+    { expandable, bordered = false, size = defaultTheme.size, ...props },
+    ref
+  ) => {
     return (
       <Table
         bordered={bordered}
@@ -17,8 +20,12 @@ const CustomTable = React.forwardRef<any, TableProps<any>>(
         ref={ref}
         pagination={{
           showSizeChanger: true,
-          pageSizeOptions: ["5", "10", "15", "20"],
+          pageSizeOptions: ["5", "10", "15", "20", "25"],
           ...props.pagination,
+        }}
+        expandable={{
+          indentSize: 25,
+          ...expandable,
         }}
         {...props}
       />

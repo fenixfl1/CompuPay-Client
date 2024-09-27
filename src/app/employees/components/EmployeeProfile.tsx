@@ -212,9 +212,9 @@ const EmployeeProfile: React.FC = () => {
       children: logDate(user.BIRTH_DAY),
     },
     {
-      key: "GENDER",
+      key: "DESC_GENDER",
       label: "Género",
-      children: user.GENDER,
+      children: user.DESC_GENDER,
     },
     {
       key: "ADDRESS",

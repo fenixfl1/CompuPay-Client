@@ -32,13 +32,14 @@ interface Roles {
 interface MenuOption<T = unknown> {
   label: string
   key: string
-  type?: "divider" | "group" | "item" | "submenu"
+  type?: "divider" | "group" | "item" | "submenu" | "link"
   icon?: string
   children?: MenuOption[]
   path: string
   title?: string
   parameters: T[]
   operations: number[]
+  content: string
 }
 
 interface RolesUser {
@@ -65,9 +66,12 @@ interface User {
   CREATED_AT: string
   CREATED_BY?: string
   CURRENCY: "RD" | "USD" | "EUR"
+  DESC_GENDER?: string
   DOCUMENT_TYPE: "C" | "P"
   EMAIL: string
+  FULL_NAME?: string
   GENDER: string
+  GROSS_SALARY?: number
   HIRED_DATE?: string
   IDENTITY_DOCUMENT: string
   IS_ACTIVE: boolean
@@ -75,6 +79,7 @@ interface User {
   IS_SUPERUSER: boolean
   LAST_NAME: string
   NAME: string
+  NAME_SUPERVISOR?: string
   NET_SALARY?: number
   PASSWORD: string
   PHONE?: string
@@ -88,8 +93,17 @@ interface User {
   UPDATED_BY?: string
   USERNAME: string
   USER_ID: number
-  GROSS_SALARY?: number
-  FULL_NAME?: string
+}
+
+interface Department {
+  DEPARTMENT_ID: number
+  STATE: string
+  CREATED_AT: string
+  UPDATED_AT?: string
+  NAME: string
+  DESCRIPTION: string
+  CREATED_BY: string
+  UPDATED_BY?: string
 }
 
 export type {
@@ -100,4 +114,5 @@ export type {
   RolesUser,
   RoleAccessPayload,
   User,
+  Department,
 }

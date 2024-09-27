@@ -1,6 +1,10 @@
+import { CheckboxChangeEvent } from "antd/lib/checkbox"
+
 export const normalizeFiles = (file: any) => {
   if (Array.isArray(file.fileList)) {
-    return file.fileList
+    return (
+      file.fileList?.filter((item: any) => item.uid === file.file.uid) ?? []
+    )
   }
 }
 
@@ -18,4 +22,8 @@ export const normalizeMaskedInput = (event: any) => {
   }
 
   return event
+}
+
+export const normalizeCheckBox = ({ target }: CheckboxChangeEvent) => {
+  return target.checked
 }

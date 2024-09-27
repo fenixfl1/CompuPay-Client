@@ -48,22 +48,38 @@ import CustomRangePicker from "./CustomRangePicker"
 import CustomDropdownButton from "./CustomDropdownButton"
 import CustomCheckboxGroup from "./CustomCheckboxGroup"
 import CustomColorPicker from "./CustomColorPicker"
+import CustomAvatarGroup from "./CustomAvatarGroup"
+import CustomPagination from "./CustomPagination"
+import CustomTabs from "./CustomTabs"
+import CustomStatistic from "./CustomStatistic"
+import CustomTableSummaryRow from "./CustomTableSummaryRow"
+import CustomTableSummaryCell from "./CustomTableSummaryCell"
+import CustomPopConfirm from "./CustomPopConfirm"
+import CustomTimeline from "./CustomTimeline"
+import CustomSegmented from "./CustomSegmented"
+import CustomDropdown from "./CustomDropdown"
 
 export {
   CustomAlert,
   CustomAvatar,
+  CustomAvatarGroup,
   CustomBadge,
   CustomButton,
   CustomCard,
   CustomCheckbox,
+  CustomCheckboxGroup,
   CustomCol,
   CustomCollapse,
+  CustomColorPicker,
   CustomContent,
   CustomDatePicker,
   CustomDescriptions,
   CustomDivider,
   CustomDragger,
   CustomDrawer,
+  CustomDropdown,
+  CustomDropdownButton,
+  CustomFloatButton,
   CustomFooter,
   CustomForm,
   CustomFormItem,
@@ -71,35 +87,39 @@ export {
   CustomInput,
   CustomInputNumber,
   CustomLayout,
+  CustomList,
+  CustomListItem,
+  CustomListItemMeta,
   CustomMaskedInput,
   CustomMenu,
   CustomModal,
+  CustomPagination,
   CustomPanel,
   CustomParagraph,
   CustomPasswordInput,
+  CustomPopConfirm,
   CustomPopover,
   CustomRadioGroup,
+  CustomRangePicker,
   CustomRow,
   CustomSearch,
+  CustomSegmented,
   CustomSelect,
   CustomSider,
   CustomSpace,
   CustomSpin,
+  CustomStatistic,
   CustomSteps,
   CustomTable,
+  CustomTableSummaryCell,
+  CustomTableSummaryRow,
+  CustomTabs,
   CustomTag,
   CustomText,
   CustomTextArea,
+  CustomTimeline,
   CustomTitle,
   CustomTooltip,
   CustomUpload,
-  CustomFloatButton,
   CustomWatermark,
-  CustomList,
-  CustomListItem,
-  CustomListItemMeta,
-  CustomRangePicker,
-  CustomDropdownButton,
-  CustomCheckboxGroup,
-  CustomColorPicker,
 }

@@ -29,6 +29,9 @@ import createUploadObject from "@/helpers/build-file-list"
 import useUserStore from "@/stores/userStore"
 import useUpdateUser from "@/services/hooks/user/useUpdateUser"
 import queryClient from "@/lib/appClient"
+import useMenuOptionStore from "@/stores/useMenuOptionStore"
+import { CustomModalConfirmation } from "@/components/custom/CustomModalMethods"
+import useSetFiles from "@/hooks/useSetFiles"
 
 const items: StepsProps["items"] = [
   {
@@ -41,56 +44,65 @@ const items: StepsProps["items"] = [
   },
 ]
 
+interface Parameters {
+  DEFAULT_PASSWORD: string
+}
+
 interface EmployeeFormProps {
   loading?: boolean
 }
 
 const EmployeeForm: React.FC<EmployeeFormProps> = ({ loading }) => {
   const [form] = Form.useForm<Partial<User>>()
+  const avatar = Form.useWatch("AVATAR", form)
   const [currentStep, setCurrentStep] = useState(0)
   const [employee, setEmployee] = useState<Partial<User>>({})
 
   const { visible, setVisible } = useModalStore()
   const { user, setUser } = useUserStore()
   const { roles } = useRolesStore()
+  const { parameters } = useMenuOptionStore<Parameters>()
+
+  const { DEFAULT_PASSWORD } = parameters
 
   const { mutateAsync: createUser, isPending: isPendingCreateUser } =
     useCreateUser()
   const { mutateAsync: updateUser, isPending: isPendingUpdateUser } =
     useUpdateUser()
-
   useEffect(() => {
     if (!user?.USER_ID) return
 
     form.setFieldsValue({
       ...user,
-      ROLES: user.ROLES?.[0].ROL_ID as never,
-      HIRED_DATE: dayjs(user?.HIRED_DATE) as any,
+      BIRTH_DATE: dayjs(user.BIRTH_DATE) as never,
+      ROLES: user.ROLES?.[0]?.ROL_ID as never,
+      HIRED_DATE: user?.HIRED_DATE
+        ? (dayjs(user?.HIRED_DATE) as any)
+        : undefined,
       RESUME: user?.RESUME
         ? (createUploadObject(user?.RESUME ?? "", user) as any)
         : undefined,
       SALARY: user?.GROSS_SALARY,
       GENDER: user.GENDER,
+      AVATAR: { url: user?.AVATAR } as never,
     })
   }, [user])
 
   useEffect(() => {
-    if (!visible) {
-      form.resetFields()
-      setCurrentStep(0)
-      setEmployee({} as User)
-      queryClient.invalidateQueries()
-      queryClient.resetQueries({ queryKey: ["users"] })
-      setUser({} as User)
-    }
-  }, [visible])
+    form.setFieldsValue({
+      AVATAR: !user?.AVATAR?.includes("http")
+        ? { ...(createUploadObject(user?.AVATAR ?? "", user) as any) }
+        : undefined,
+    } as never)
+  }, [user])
 
   useEffect(() => {
     return () => {
       form.resetFields()
       setCurrentStep(0)
       setEmployee({} as User)
-      setUser({} as User)
+      queryClient.invalidateQueries()
+      queryClient.resetQueries({ queryKey: ["users"] })
     }
   }, [])
 
@@ -111,11 +123,17 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ loading }) => {
       const data = { ...employee, ...dataForm }
 
       assert<dayjs.Dayjs>(data.HIRED_DATE)
+      assert<dayjs.Dayjs>(data.BIRTH_DATE)
       assert<File[]>(data.RESUME)
+      assert<File[]>(data.AVATAR)
 
+      data.AVATAR = await getBase64(data.AVATAR?.[0])
       data.RESUME = await getBase64(data.RESUME?.[0])
+
+      data.PASSWORD = DEFAULT_PASSWORD
       data.ROLES = [data.ROLES] as never
       data.HIRED_DATE = data.HIRED_DATE.format("YYYY-MM-DD")
+      data.BIRTH_DATE = data.BIRTH_DATE.format("YYYY-MM-DD")
       data.STATE = roles.find(
         (rol) => rol.ROL_ID === (data.ROLES as unknown as number)
       )?.INIT_USER_STATE as string
@@ -160,11 +178,20 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ loading }) => {
     setCurrentStep(currentStep - 1)
   }
 
+  const handleOnCancel = () => {
+    CustomModalConfirmation({
+      title: "Cancelar registro",
+      onOk: () => setVisible(false),
+      content:
+        "¿Seguro que desea cancelar eḷ registro, cualquier cambio que halla hecho se perderá?",
+    })
+  }
+
   return (
     <CustomModal
       destroyOnClose
       width={"60%"}
-      onCancel={() => setVisible(false)}
+      onCancel={handleOnCancel}
       open={visible}
       footer={null}
       title={"Nuevo Empleado"}

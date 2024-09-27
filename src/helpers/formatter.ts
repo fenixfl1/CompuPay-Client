@@ -21,16 +21,22 @@ function formatter(props: Formatter) {
     if (format === "currency") {
       const fixedValue = parseFloat(value).toFixed(fix)
       if (prefix) {
-        return `${prefix} ${fixedValue.replace(/\B(?=(\d{3})+(?!\d)\.?)/g, ",")}`
+        return `${prefix}$ ${fixedValue.replace(/\B(?=(\d{3})+(?!\d)\.?)/g, ",")}`
       }
       return fixedValue.replace(/\B(?=(\d{3})+(?!\d)\.?)/g, ",")
     }
     if (format === "long_date") {
-      return moment(originalValue).format(LOG_DATE_FORMAT)
+      return moment(originalValue)
+        .format(LOG_DATE_FORMAT)
+        ?.replace("Fecha inválida", "N/A")
     }
     if (format === "date") {
       const date = moment(originalValue)
       return date.isValid() ? date.format(DATE_FORMAT) : ""
+    }
+    if (format === "percentage") {
+      const fixedValue = parseFloat(value).toFixed(fix)
+      return `%${fixedValue.replace(/\B(?=(\d{3})+(?!\d)\.?)/g, ",")}`
     }
   }
 

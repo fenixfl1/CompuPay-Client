@@ -5,8 +5,9 @@ import { ParagraphProps } from "antd/es/typography/Paragraph"
 import { LinkProps } from "antd/es/typography/Link"
 import Linkify from "react-linkify"
 import { TitleProps } from "antd/lib/typography/Title"
+import Link from "next/link"
 
-const { Paragraph, Text, Link, Title } = Typography
+const { Paragraph, Text, Link: AntLink, Title } = Typography
 
 interface CustomTextProps extends TextProps {
   align?:
@@ -32,9 +33,9 @@ export const CustomText = React.forwardRef<HTMLSpanElement, CustomTextProps>(
 export const CustomLink = React.forwardRef<HTMLElement, LinkProps>(
   ({ target = "_blank", ...props }, ref) => {
     return (
-      <Link target={target} {...props} ref={ref}>
+      <AntLink target={target} {...props} ref={ref}>
         {props.children}
-      </Link>
+      </AntLink>
     )
   }
 )
@@ -44,14 +45,16 @@ export const CustomParagraph = React.forwardRef<HTMLElement, ParagraphProps>(
     return (
       <Paragraph {...props} ref={ref}>
         <Linkify
+          children={""}
           componentDecorator={(decoratedHref, decoratedText, key) => (
-            <CustomLink key={key} href={decoratedHref}>
-              {decoratedText}
-            </CustomLink>
+            <Link passHref key={key} href={decoratedHref} legacyBehavior>
+              <a target="_blank" rel="noopener noreferrer">
+                {decoratedText}
+              </a>
+            </Link>
           )}
-        >
-          {props.children}
-        </Linkify>
+        />
+        {props.children}
       </Paragraph>
     )
   }

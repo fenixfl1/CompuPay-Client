@@ -4,7 +4,6 @@ import {
   CustomButton,
   CustomCheckboxGroup,
   CustomCol,
-  CustomDatePicker,
   CustomDivider,
   CustomForm,
   CustomFormItem,
@@ -22,23 +21,12 @@ import {
 } from "@/components/custom"
 import formatter from "@/helpers/formatter"
 import { Roles, User } from "@/interfaces/user"
-import {
-  DownOutlined,
-  EditOutlined,
-  FilterOutlined,
-  PlusOutlined,
-} from "@ant-design/icons"
+import { DownOutlined, EditOutlined, FilterOutlined } from "@ant-design/icons"
 import { ColumnType, TablePaginationConfig } from "antd/lib/table"
-import React, {
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react"
+import React, { useContext, useEffect, useRef, useState } from "react"
 import styled from "styled-components"
 import EmployeeForm from "./EmployeeForm"
-import { AdvancedCondition, Metadata } from "@/services/interfaces"
+import { Metadata } from "@/services/interfaces"
 import randomHexColorCode from "@/helpers/random-hex-color-code"
 import useMenuOptionStore from "@/stores/useMenuOptionStore"
 import { EmployeesParameters } from "@/interfaces/parameters"
@@ -57,18 +45,12 @@ import EmployeeProfile from "./EmployeeProfile"
 import useDrawerStore from "@/stores/drawerStore"
 import dayjs from "dayjs"
 import { FormInstance } from "antd/lib"
+import { PopoverContainer } from "@/components/custom/CustomPopover"
+import FilterTemplate from "@/components/FilterTemplate"
 
 const Tag = styled(CustomTag)`
   min-width: 70px;
   text-align: center !important;
-`
-
-const PopoverContainer = styled.div`
-  width: 300px;
-  max-height: 300px;
-  padding: 10px;
-  margin-bottom: 10px;
-  overflow-y: auto;
 `
 
 const optionStyles: React.CSSProperties = {
@@ -94,7 +76,7 @@ const searchOptions = [
   },
   {
     label: "Cédula",
-    value: "IDENTIFICATION",
+    value: "IDENTITY_DOCUMENT",
     style: optionStyles,
   },
   {
@@ -120,7 +102,7 @@ interface EditableCellProps {
   dataIndex: keyof User
   record: User
   options: { label: string; value: string }[]
-  handleSave: (record: User) => void
+  onSave: (record: User) => void
 }
 
 const EditableCell: React.FC<React.PropsWithChildren<EditableCellProps>> = ({
@@ -130,7 +112,7 @@ const EditableCell: React.FC<React.PropsWithChildren<EditableCellProps>> = ({
   dataIndex,
   record,
   options,
-  handleSave,
+  onSave,
   ...restProps
 }) => {
   const [editing, setEditing] = useState(false)
@@ -150,17 +132,14 @@ const EditableCell: React.FC<React.PropsWithChildren<EditableCellProps>> = ({
 
   const save = async () => {
     try {
-      const values = await form.validateFields()
+      const values = form.getFieldsValue()
 
-      if (record[dataIndex] === values[dataIndex]) {
-        toggleEdit()
-        return
+      if (record?.[dataIndex] !== values?.[dataIndex]) {
+        onSave({ ...record, ...values })
       }
-
       toggleEdit()
-      handleSave({ ...record, ...values })
-    } catch (errInfo) {
-      errorHandler(errInfo)
+    } catch (error) {
+      errorHandler(error)
     }
   }
 
@@ -186,7 +165,15 @@ const EditableCell: React.FC<React.PropsWithChildren<EditableCellProps>> = ({
             name={dataIndex}
             rules={[{ required: true, message: `${title} is required.` }]}
           >
-            <CustomSelect options={options} onSelect={save} onBlur={save} />
+            <CustomSelect
+              onKeyDown={({ code }) => {
+                if (code === "Escape") toggleEdit()
+              }}
+              options={options}
+              onSelect={save}
+              onBlur={save}
+              autoFocus
+            />
           </CustomFormItem>
         </ConditionalComponent>
       </ConditionalComponent>
@@ -200,7 +187,8 @@ interface EmployeeTableProps {
   metadata: Metadata
   onChange?: (pagination: TablePaginationConfig) => void
   onSearch: (value: string) => void
-  form?: FormInstance
+  onFilter?: () => void
+  form: FormInstance
   showFilter?: boolean
 }
 
@@ -210,6 +198,7 @@ const EmployeesTable: React.FC<EmployeeTableProps> = ({
   metadata,
   onChange,
   onSearch,
+  onFilter,
   showFilter = true,
   form,
 }) => {
@@ -256,120 +245,112 @@ const EmployeesTable: React.FC<EmployeeTableProps> = ({
   }
 
   const popoverContent = (
-    <>
-      <PopoverContainer>
-        <CustomSpace>
-          <CustomCol xs={24}>
-            <CustomFormItem
-              layout="vertical"
-              name={"STATUS"}
-              label={<CustomText strong>Estado</CustomText>}
-            >
-              <CustomCheckboxGroup options={statusOptions} />
-            </CustomFormItem>
-          </CustomCol>
-          <CustomCol xs={24}>
-            <CustomFormItem
-              layout="vertical"
-              label={<CustomText strong>Rango salarial</CustomText>}
-            >
-              <CustomSpace direction="horizontal">
-                <CustomFormItem name={"MIN_SALARY"} noStyle initialValue={0}>
-                  <CustomInputNumber
-                    format={{ format: "currency", currency: "RD" }}
-                    placeholder={"Mínimo"}
-                    width={100}
-                  />
-                </CustomFormItem>
-                <CustomFormItem name={"MAX_SALARY"} noStyle>
-                  <CustomInputNumber
-                    format={{ format: "currency", currency: "RD" }}
-                    placeholder={"Máximo"}
-                    width={100}
-                  />
-                </CustomFormItem>
-              </CustomSpace>
-            </CustomFormItem>
-          </CustomCol>
-          <CustomCol xs={24}>
-            <CustomFormItem
-              label={
-                <CustomText strong>Rango Fecha de contratación</CustomText>
-              }
-              layout="vertical"
-              name={"RANGE_DATE"}
-            >
-              <CustomRangePicker
-                maxDate={dayjs()}
-                placeholder={["Fecha Inicial", "Fecha Final"]}
-              />
-            </CustomFormItem>
-          </CustomCol>
-          <CustomCol xs={24}>
-            <CustomFormItem
-              layout="vertical"
-              label={<CustomText strong>Roles</CustomText>}
-              name={"ROLES"}
-            >
-              <CustomSelect
-                mode={"multiple"}
-                placeholder={"Seleccionar roles"}
-                options={roles.map((rol) => ({
-                  label: rol.NAME,
-                  value: rol.ROL_ID,
-                }))}
-              />
-            </CustomFormItem>
-          </CustomCol>
-          <CustomCol xs={24}>
-            <CustomFormItem
-              layout="vertical"
-              name={"SEARCH_OPTIONS"}
-              label={<CustomText strong>Buscar por</CustomText>}
-              labelCol={{ span: 24 }}
-            >
-              <CustomSelect
-                placeholder={"Seleccionar opciones"}
-                options={searchOptions}
-                mode={"multiple"}
-              />
-            </CustomFormItem>
-          </CustomCol>
-        </CustomSpace>
-      </PopoverContainer>
-      <CustomCol xs={24}>
-        <CustomRow justify={"space-between"}>
-          <CustomButton
-            type={"link"}
-            onClick={() => {
-              form?.resetFields()
-              onSearch?.("")
-            }}
+    <FilterTemplate form={form} onFilter={onFilter}>
+      <CustomSpace>
+        <CustomCol xs={24}>
+          <CustomFormItem
+            layout="vertical"
+            name={"STATUS"}
+            label={<CustomText strong>Estado</CustomText>}
           >
-            Restablecer filtros
-          </CustomButton>
-          <CustomButton
-            type={"primary"}
-            icon={<FilterOutlined />}
-            onClick={() => onSearch?.(formValues?.SEARCH)}
+            <CustomCheckboxGroup options={statusOptions} />
+          </CustomFormItem>
+        </CustomCol>
+        <CustomCol xs={24}>
+          <CustomFormItem
+            layout="vertical"
+            label={<CustomText strong>Rango salarial</CustomText>}
           >
-            Aplicar filtros
-          </CustomButton>
-        </CustomRow>
-      </CustomCol>
-    </>
+            <CustomSpace direction="horizontal">
+              <CustomFormItem name={"MIN_SALARY"} noStyle initialValue={0}>
+                <CustomInputNumber
+                  format={{ format: "currency", currency: "RD" }}
+                  placeholder={"Mínimo"}
+                  width={100}
+                />
+              </CustomFormItem>
+              <CustomFormItem name={"MAX_SALARY"} noStyle>
+                <CustomInputNumber
+                  format={{ format: "currency", currency: "RD" }}
+                  placeholder={"Máximo"}
+                  width={100}
+                />
+              </CustomFormItem>
+            </CustomSpace>
+          </CustomFormItem>
+        </CustomCol>
+        <CustomCol xs={24}>
+          <CustomFormItem
+            label={<CustomText strong>Rango Fecha de contratación</CustomText>}
+            layout="vertical"
+            name={"RANGE_DATE"}
+            labelCol={{ span: 24 }}
+          >
+            <CustomRangePicker
+              maxDate={dayjs()}
+              placeholder={["Fecha Inicial", "Fecha Final"]}
+            />
+          </CustomFormItem>
+        </CustomCol>
+        <CustomCol xs={24}>
+          <CustomFormItem
+            layout="vertical"
+            label={<CustomText strong>Roles</CustomText>}
+            name={"ROLES"}
+          >
+            <CustomSelect
+              mode={"multiple"}
+              placeholder={"Seleccionar roles"}
+              options={roles.map((rol) => ({
+                label: rol.NAME,
+                value: rol.ROL_ID,
+              }))}
+            />
+          </CustomFormItem>
+        </CustomCol>
+        <CustomCol xs={24}>
+          <CustomFormItem
+            layout="vertical"
+            name={"SEARCH_OPTIONS"}
+            label={<CustomText strong>Buscar por</CustomText>}
+            labelCol={{ span: 24 }}
+          >
+            <CustomSelect
+              placeholder={"Seleccionar opciones"}
+              options={searchOptions}
+              mode={"multiple"}
+            />
+          </CustomFormItem>
+        </CustomCol>
+      </CustomSpace>
+    </FilterTemplate>
   )
+
+  const getRecordIndex = (index: number) => {
+    if (metadata.page > 1) {
+      return metadata.page_size + index + 1
+    }
+
+    return index + 1
+  }
 
   const columns: CustomColumnType<User>[] = [
     {
+      key: "ROW_COUNT",
+      render: (v, r, index) => (
+        <CustomText type={"secondary"}>{getRecordIndex(index)}</CustomText>
+      ),
+    },
+    {
       dataIndex: "AVATAR",
       key: "AVATAR",
-      width: "5%",
+      width: "3%",
+      align: "center",
       render: (value: string) => (
         <CustomAvatar
           style={{
             backgroundColor:
-              value.length === 2 ? randomHexColorCode() : undefined,
+              value?.length === 2 ? randomHexColorCode() : undefined,
           }}
           src={value}
           size={"large"}
@@ -383,7 +364,7 @@ const EmployeesTable: React.FC<EmployeeTableProps> = ({
       title: "Nombre",
       dataIndex: "NAME",
       key: "NAME",
-      render: (_, record: User) => (
+      render: (_, record) => (
         <CustomButton
           type={"link"}
           onClick={async () => {
@@ -396,27 +377,31 @@ const EmployeesTable: React.FC<EmployeeTableProps> = ({
       ),
     },
     {
+      title: "Nombre de Usuario",
+      dataIndex: "USERNAME",
+      key: "USERNAME",
+      render: (value) => `@${value}`,
+    },
+    {
+      title: "Genero",
+      dataIndex: "DESC_GENDER",
+      key: "DESC_GENDER",
+    },
+    {
       title: "Correo",
       dataIndex: "EMAIL",
       key: "EMAIL",
     },
     {
-      title: "Salario Bruto",
-      dataIndex: "GROSS_SALARY",
-      key: "GROSS_SALARY",
-      render: currencyFormatter,
+      title: "Supervisor",
+      dataIndex: "NAME_SUPERVISOR",
+      key: "NAME_SUPERVISOR",
+      render: (value) => value ?? "N/A",
     },
     {
-      title: "Impuestos",
-      dataIndex: "TAX",
-      key: "TAX",
-      render: currencyFormatter,
-    },
-    {
-      title: "Salario Neto",
-      dataIndex: "NET_SALARY",
-      key: "NET_SALARY",
-      render: currencyFormatter,
+      key: "DESC_DEPARTMENT",
+      dataIndex: "DESC_DEPARTMENT",
+      title: "Departamento",
     },
     {
       title: "Rol",
@@ -426,7 +411,11 @@ const EmployeesTable: React.FC<EmployeeTableProps> = ({
       render: (roles: Roles[]) => (
         <CustomSpace size={1} wrap={false} direction="horizontal">
           {roles.map((role) => (
-            <CustomTag color={role.COLOR} key={role.ROL_ID}>
+            <CustomTag
+              color={role.COLOR}
+              key={role.ROL_ID}
+              style={{ minWidth: "70px", textAlign: "center" }}
+            >
               {role.NAME}
             </CustomTag>
           ))}
@@ -497,7 +486,7 @@ const EmployeesTable: React.FC<EmployeeTableProps> = ({
         dataIndex: col.dataIndex,
         title: col.title,
         options: col.options,
-        handleSave: handleSave,
+        onSave: handleSave,
       }),
     }
   }) as ColumnType<User>[]

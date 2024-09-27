@@ -1,18 +1,28 @@
 {
     "cSpell.words": [
+        "AUTOPAY",
         "cedula",
+        "chartjs",
         "cssinjs",
         "dayjs",
         "ILIKE",
         "nextjs",
         "payflow",
+        "Popconfirm",
         "popover",
         "Popover",
+        "recharts",
+        "REPR",
         "rolesusers",
         "Segoe",
         "Simbolo",
         "tanstack",
+        "TASKXUSERS",
         "telefono",
+        "texarea",
+        "Usergroup",
         "zustand"
-    ]
+    ],
+    "css.lint.unknownAtRules": "ignore",
+    "scss.lint.unknownAtRules": "ignore"
 }

@@ -27,3 +27,19 @@ export const date = (date: string): StrDate => {
   if (!date) return ""
   return moment(date).format(DATE_FORMAT)
 }
+
+export const compareDate = (
+  date: string,
+  base: string | Date = new Date()
+): number => {
+  const dateToCompare = new Date(date)
+  const baseDate = typeof base === "string" ? new Date(base) : base
+
+  if (dateToCompare < baseDate) {
+    return -1 // date is before base
+  } else if (dateToCompare > baseDate) {
+    return 1 // date is after base
+  } else {
+    return 0 // dates are equal
+  }
+}

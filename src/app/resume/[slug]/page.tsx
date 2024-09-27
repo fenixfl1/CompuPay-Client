@@ -20,11 +20,6 @@ const page: NextPage<PageProps> = ({ params }) => {
   const { user } = useUserStore()
   const { mutateAsync: getUser } = useGetUser()
 
-  React.useEffect(() => {
-    // eslint-disable-next-line no-console
-    console.log({ user })
-  }, [user])
-
   useEffect(() => {
     if (!username) return
     getUser({

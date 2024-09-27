@@ -10,18 +10,25 @@ export interface CustomCardProps extends CardProps {
 }
 
 const StyledCard = styled<React.FC<CustomCardProps>>(Card)`
-  box-shadow: ${(props) => (props.shadow ? props.theme.boxShadow : undefined)};
-  background-color: ${(props) => props.color};
+  box-shadow: ${({ shadow, theme }) =>
+    shadow ? theme.boxShadow : undefined} !important;
+  background-color: ${({ color }) => color} !important;
 `
 
 const CustomCard: React.FC<CustomCardProps> = ({
   shadow,
   height,
   width,
+  color,
   ...props
 }) => {
   return (
-    <StyledCard {...props} style={{ ...props.style, height, width }}>
+    <StyledCard
+      color={color}
+      shadow={shadow}
+      style={{ ...props.style, height, width }}
+      {...props}
+    >
       {props.children}
     </StyledCard>
   )

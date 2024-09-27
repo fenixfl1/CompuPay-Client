@@ -11,11 +11,7 @@ function useGetUser() {
   return useCustomMutation<User, Condition<User>>({
     initialData: <User>{},
     mutationKey: ["user", "get-single-user"],
-    onSuccess: (data) => {
-      // eslint-disable-next-line no-console
-      console.log({ data })
-      setUser(data)
-    },
+    onSuccess: setUser,
     mutationFn: async (payload) => {
       const {
         data: { data },

@@ -34,14 +34,12 @@ const CustomDragger = React.forwardRef<UploadRef, CustomDraggerProps>(
     const files = Form.useWatch(name as NamePath, form)
     const [fileList, setFileList] = React.useState<UploadFile[]>([])
 
-    React.useEffect(() => {
-      // eslint-disable-next-line no-console
-      console.log({ files })
-    }, [files])
-
     const handleOnChange = (info: UploadChangeParam<UploadFile<any>>) => {
       if (readonly) return
-      setFileList(info.fileList)
+      const fileList = multiple
+        ? info.fileList
+        : info.fileList?.filter((item) => item.uid === info.file.uid)
+      setFileList(fileList)
       onChange?.(info)
     }
 

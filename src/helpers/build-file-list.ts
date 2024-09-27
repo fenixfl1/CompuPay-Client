@@ -24,7 +24,7 @@ function createUploadObject(base64: string, user: User) {
       uid: `rc-upload-${Date.now()}`,
       name: file.name,
       status: "done",
-      url: `/resume/${user.USERNAME}`,
+      url: base64?.split(",")?.[1] ?? `/resume/${user.USERNAME}`,
     },
   ]
 }

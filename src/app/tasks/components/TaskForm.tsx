@@ -30,6 +30,13 @@ import { useGetUserLIst } from "@/services/hooks/user/useGetUserList"
 import useDebounce from "@/hooks/useDebounce"
 import useCreateTask from "@/services/hooks/tasks/useCreateTask"
 import errorHandler from "@/helpers/errorHandler"
+import ConditionalComponent from "@/components/ConditionalComponent"
+
+const priorityOptions = [
+  { label: "Baja", value: "L" },
+  { label: "Media", value: "M" },
+  { label: "Alta", value: "H" },
+]
 
 const TaskForm: React.FC = () => {
   const [form] = Form.useForm()
@@ -120,59 +127,69 @@ const TaskForm: React.FC = () => {
                 </CustomFormItem>
               </CustomCol>
 
-              <CustomCol {...defaultBreakpoints}>
+              <CustomCol xs={24}>
                 <CustomFormItem
-                  label={"Usuario"}
-                  name={"ASSIGNED_USER"}
-                  labelCol={{ xs: 8 }}
+                  label={"Usuarios"}
+                  name={"ASSIGNED_USERS"}
+                  {...labelColFullWidth}
                 >
                   <CustomSelect
                     showSearch
+                    mode={"multiple"}
                     onSearch={setSearchValue}
                     placeholder={"Seleccionar usuario asignado"}
                     options={userOptions}
                   />
                 </CustomFormItem>
               </CustomCol>
-              <CustomCol xs={24}>
+              <CustomCol {...defaultBreakpoints}>
                 <CustomFormItem
                   label={"Fechas"}
                   name={"FECHAS"}
                   tooltip={"Fecha de inicio y de entrega de la tarea"}
-                  {...labelColFullWidth}
                 >
                   <CustomRangePicker
                     placeholder={["Fecha de inicio", "Fecha de entrega"]}
                   />
                 </CustomFormItem>
               </CustomCol>
-              <CustomCol xs={20} push={4} style={{ marginBottom: "20px" }}>
-                <CustomSpace direction="horizontal" size={4} wrap>
-                  {selectedTags.map((tag) => (
-                    <CustomTag
-                      closable
-                      onClose={() => {
-                        setSelectedTags((prev) =>
-                          prev.filter(
-                            (prevTag) => prevTag.TAG_ID !== tag.TAG_ID
-                          )
-                        )
-                      }}
-                      key={tag.TAG_ID}
-                      color={tag.COLOR}
-                    >
-                      {tag.NAME}
-                    </CustomTag>
-                  ))}
-                  <CustomButton
-                    icon={<PlusOutlined />}
-                    type={"primary"}
-                    onClick={() => setShowTagList(true)}
-                  >
-                    Agregar etiqueta
-                  </CustomButton>
-                </CustomSpace>
+              <CustomCol {...defaultBreakpoints}>
+                <CustomFormItem label={"Prioridad"} name={"PRIORITY"}>
+                  <CustomSelect
+                    placeholder={"Seleccionar Prioridad"}
+                    options={priorityOptions}
+                  />
+                </CustomFormItem>
               </CustomCol>
+              <ConditionalComponent condition={false}>
+                <CustomCol xs={20} push={4} style={{ marginBottom: "20px" }}>
+                  <CustomSpace direction="horizontal" size={4} wrap>
+                    {selectedTags.map((tag) => (
+                      <CustomTag
+                        closable
+                        onClose={() => {
+                          setSelectedTags((prev) =>
+                            prev.filter(
+                              (prevTag) => prevTag.TAG_ID !== tag.TAG_ID
+                            )
+                          )
+                        }}
+                        key={tag.TAG_ID}
+                        color={tag.COLOR}
+                      >
+                        {tag.NAME}
+                      </CustomTag>
+                    ))}
+                    <CustomButton
+                      icon={<PlusOutlined />}
+                      type={"primary"}
+                      onClick={() => setShowTagList(true)}
+                    >
+                      Agregar etiqueta
+                    </CustomButton>
+                  </CustomSpace>
+                </CustomCol>
+              </ConditionalComponent>
               <CustomCol xs={24}>
                 <CustomFormItem
                   label={"Descripción"}
@@ -180,7 +197,7 @@ const TaskForm: React.FC = () => {
                   rules={[{ required: true }]}
                   {...labelColFullWidth}
                 >
-                  <CustomTextArea rows={10} />
+                  <CustomTextArea rows={2} maxLength={100} />
                 </CustomFormItem>
               </CustomCol>
             </CustomRow>

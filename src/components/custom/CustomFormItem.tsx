@@ -16,10 +16,6 @@ const CustomFormItem: React.FC<CustomFormItemProps> = ({
   noSymbol,
   ...props
 }) => {
-  const checkRequiredRule = props.rules
-    ? !!props.rules.find((value: Rule) => value["required" as keyof Rule])
-    : required
-
   if (onlyString) {
     props.normalize = (value: string) => {
       if (RegExp(patternOnlyLetter).test(value)) {
@@ -44,7 +40,7 @@ const CustomFormItem: React.FC<CustomFormItemProps> = ({
 
   return (
     <FormItemProvider {...props}>
-      <Item required={checkRequiredRule} {...props}>
+      <Item required={required} {...props}>
         {props.children}
       </Item>
     </FormItemProvider>

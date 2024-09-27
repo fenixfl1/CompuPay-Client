@@ -9,8 +9,7 @@ import {
   CustomButton,
   CustomCol,
   CustomContent,
-  CustomFloatButton,
-  CustomFooter,
+  CustomDropdown,
   CustomHeader,
   CustomMenu,
   CustomRow,
@@ -18,12 +17,10 @@ import {
   CustomSpace,
   CustomSpin,
   CustomText,
-  CustomTitle,
 } from "./custom"
 import { getSessionInfo, isLoggedIn, removeSession } from "@/lib/session"
 import ConditionalComponent from "./ConditionalComponent"
-import { redirect } from "next/navigation"
-import { PATH_HOME, PATH_LOGIN } from "@/constants/routes"
+import { PATH_HOME } from "@/constants/routes"
 import { useGetMenuOptions } from "@/services/hooks"
 import useMenuOptionStore from "@/stores/useMenuOptionStore"
 import SVGReader from "./SVGReader"
@@ -44,12 +41,14 @@ import MotionComponent from "./MotionComponent"
 import useDrawerStore from "@/stores/drawerStore"
 import useGetUser from "@/services/hooks/user/useGetUser"
 import { CustomModalConfirmation } from "./custom/CustomModalMethods"
-import sleep from "@/helpers/sleep"
 import useIsAuthorized from "@/hooks/useIsAuthorized"
 import { GenericParameters } from "@/interfaces/parameters"
 import { assert } from "@/helpers/assert"
 import EmployeeProfile from "@/app/employees/components/EmployeeProfile"
 import Fallback from "./Fallback"
+import Link from "next/link"
+import { MenuProps, message } from "antd"
+import { useSocket } from "@/lib/socket"
 
 const LogoContainer = styled.div`
   height: 75px;
@@ -80,9 +79,7 @@ const HeaderContainer = styled(CustomRow)`
   gap: 16px;
 `
 
-const Content = styled(CustomContent)`
-  overflow: initial !important;
-`
+const Content = styled(CustomContent)``
 
 const Sider = styled(CustomSider)`
   height: 100vh !important;
@@ -115,6 +112,17 @@ const CustomContentContainer = styled.div`
   border-radius: ${(props) => props.theme.borderRadius};
   margin: 0px 34px 10px 274px !important;
   padding: 10px;
+  height: auto;
+
+  @media screen and (min-width: 1430px) {
+    max-width: 1100px;
+    margin: 0px 34px 10px 460px !important;
+  }
+
+  @media screen and (max-width: 1800px) {
+    margin: 0px 34px 10px 274px !important;
+    max-width: 1377px;
+  }
 `
 
 const ContentLayout = styled(CustomLayout)`
@@ -133,13 +141,13 @@ const LogoutContainer = styled.div`
   align-items: center;
   padding: 16px;
 `
-
-interface RouteWrapperProps {
+interface WrapperProps {
   children: React.ReactNode
 }
 
-const RouteWrapper: React.FC<RouteWrapperProps> = (props) => {
+const Wrapper: React.FC<WrapperProps> = (props) => {
   const router = useRouter()
+  const socket = useSocket()
   const [isPending, startTransition] = useTransition()
   const { setOpenDrawer, open } = useDrawerStore()
   const { setVisible } = useModalStore()
@@ -153,9 +161,34 @@ const RouteWrapper: React.FC<RouteWrapperProps> = (props) => {
 
   const operationCreate =
     parameters?.ID_OPERACION_CREAR_EMPLEADOS ||
-    parameters?.ID_OPERACION_CREAR_TAREAS
+    parameters?.ID_OPERACION_CREAR_TAREAS ||
+    parameters?.ID_OPERACION_CREAR_NOMINA
 
   const canCreate = useIsAuthorized(Number(operationCreate))
+
+  useEffect(() => {
+    if (socket) {
+      socket.on("message", (data) => {
+        // eslint-disable-next-line no-console
+        console.log({ message })
+      })
+
+      socket.on("connect", () => {
+        // eslint-disable-next-line no-console
+        console.log("Connected")
+      })
+
+      socket.send("It's amazing!!")
+    }
+
+    socket?.open()
+
+    return () => {
+      if (socket) {
+        socket.off("message")
+      }
+    }
+  }, [socket])
 
   useEffect(() => {
     setSelectedMenuOption(getSelectedOption())
@@ -174,19 +207,82 @@ const RouteWrapper: React.FC<RouteWrapperProps> = (props) => {
   }
 
   const handleOnSelect = (item: MenuOption) => {
-    setSelectedMenuOption(item)
-    setParameters(item.parameters)
-    startTransition(() => {
-      router.push(item.path)
-    })
+    if (item.type !== "link") {
+      setSelectedMenuOption(item)
+      setParameters(item.parameters)
+    }
   }
 
-  const items: ItemType[] = menuOptions.map(({ icon, ...item }) => ({
+  const items: ItemType[] = menuOptions.map(({ icon, label, ...item }) => ({
+    ...item,
     icon: <SVGReader svg={icon as string} />,
     type: item.type as any,
-    onClick: () => handleOnSelect(item),
-    ...item,
+    onClick: () => handleOnSelect({ ...item, label }),
+    label: (
+      <ConditionalComponent condition={!!item.path} fallback={label}>
+        <Link href={item.path} passHref legacyBehavior>
+          <a target={item.type === "link" ? "_blank" : undefined}>{label}</a>
+        </Link>
+      </ConditionalComponent>
+    ),
   }))
+
+  const notifyItems: MenuProps["items"] = [
+    {
+      label: (
+        <CustomRow justify={"space-between"}>
+          <div
+            style={{
+              width: "max-content",
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            <CustomText strong>Task</CustomText>{" "}
+            <CustomText type={"secondary"}>Notification Message 1</CustomText>
+          </div>
+          <CustomBadge dot />
+        </CustomRow>
+      ),
+      key: "1",
+    },
+    {
+      label: (
+        <CustomRow justify={"space-between"}>
+          <div
+            style={{
+              width: "max-content",
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            <CustomText strong>Users</CustomText>{" "}
+            <CustomText type={"secondary"}>Notification Message 2</CustomText>
+          </div>
+          <CustomBadge dot />
+        </CustomRow>
+      ),
+      key: "2",
+    },
+    {
+      label: (
+        <CustomRow justify={"space-between"}>
+          <div
+            style={{
+              width: "max-content",
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            <CustomText strong>Payroll</CustomText>{" "}
+            <CustomText type={"secondary"}>Notification Message 3</CustomText>
+          </div>
+          <CustomBadge dot />
+        </CustomRow>
+      ),
+      key: "3",
+    },
+  ]
 
   return (
     <ConditionalComponent
@@ -242,6 +338,7 @@ const RouteWrapper: React.FC<RouteWrapperProps> = (props) => {
 
             <LogoutContainer>
               <CustomButton
+                size={"large"}
                 type={"text"}
                 icon={<LogoutOutlined />}
                 block
@@ -282,13 +379,24 @@ const RouteWrapper: React.FC<RouteWrapperProps> = (props) => {
                     icon={<SearchOutlined />}
                     shape={"circle"}
                   />
-                  <CustomBadge count={5}>
-                    <CustomButton
-                      size={"large"}
-                      icon={<BellOutlined />}
-                      shape={"circle"}
-                    />
-                  </CustomBadge>
+                  <CustomDropdown
+                    destroyPopupOnHide
+                    menu={{
+                      items: notifyItems,
+                      className: "notification-dropdown",
+                    }}
+                    dropdownRender={(node) => (
+                      <div style={{ width: "400px" }}>{node}</div>
+                    )}
+                  >
+                    <CustomBadge count={5}>
+                      <CustomButton
+                        size={"large"}
+                        icon={<BellOutlined />}
+                        shape={"circle"}
+                      />
+                    </CustomBadge>
+                  </CustomDropdown>
                 </CustomRow>
               </HeaderContainer>
             </CustomHeader>
@@ -296,7 +404,7 @@ const RouteWrapper: React.FC<RouteWrapperProps> = (props) => {
               <CustomContentContainer>
                 <ConditionalComponent
                   condition={!isPending}
-                  // fallback={<Fallback />}
+                  fallback={<Fallback />}
                 >
                   <MotionComponent key={isPending ? 1 : 0}>
                     <CustomSpin spinning={isUserPending}>
@@ -317,4 +425,4 @@ const RouteWrapper: React.FC<RouteWrapperProps> = (props) => {
   )
 }
 
-export default RouteWrapper
+export default Wrapper

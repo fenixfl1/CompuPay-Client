@@ -98,6 +98,7 @@ const CustomUpload: React.FC<CustomUploadProps> = ({
         customRequest={dummyRequest}
         listType={listType}
         onPreview={handlePreview}
+        fileList={Array.isArray(fileList) ? fileList : undefined}
         {...props}
       >
         {fileList.length >= 1 && !multiple ? null : uploadButton}

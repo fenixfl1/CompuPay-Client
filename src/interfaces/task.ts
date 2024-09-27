@@ -1,3 +1,5 @@
+import { User } from "./user"
+
 export interface Task {
   TASK_ID: number
   STATE: "A" | "I"
@@ -5,15 +7,14 @@ export interface Task {
   UPDATED_AT?: string
   NAME: string
   DESCRIPTION: string
-  STATUS: string
   PRIORITY?: string
   START_DATE?: string
   END_DATE?: string
   CREATED_BY: string
   UPDATED_BY?: string
-  ASSIGNED_USER: string
-  AVATAR?: string
   TAGS: Tag[]
+  ASSIGNED_USERS: Pick<User, "AVATAR" | "FULL_NAME" | "USERNAME">[]
+  COMPLETED: boolean
 }
 
 export interface Tag {
