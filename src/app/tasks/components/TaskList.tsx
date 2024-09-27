@@ -92,8 +92,6 @@ const TaskList: React.FC = () => {
   const priority = Form.useWatch("PRIORITY", form)
   const searchKeys = Form.useWatch("SEARCH_OPTIONS", form)
 
-  const socket = useSocket()
-
   const debouncedValues = useDebounce(status || priority || searchOptions)
 
   const [showTaskInfo, setShowTaskInfo] = useState(false)
@@ -174,10 +172,6 @@ const TaskList: React.FC = () => {
       })
 
       setShouldUpdate(!shouldUpdate)
-
-      if (socket) {
-        socket.send("Hello, word")
-      }
     } catch (error) {
       errorHandler(error)
     }

@@ -76,7 +76,7 @@ const EmployeeProfile: React.FC = () => {
   const [changePasswordModal, setChangePasswordModal] = useState(false)
   const [showChangeProfileOptions, setShowChangeProfileOptions] =
     useState(false)
-  const { user } = useUserStore()
+  const { user, setUser } = useUserStore()
   const { open, setOpenDrawer } = useDrawerStore()
 
   const { mutateAsync: updateUser, isPending } = useUpdateUser()
@@ -340,7 +340,10 @@ const EmployeeProfile: React.FC = () => {
         placement={"right"}
         width={"50%"}
         open={open}
-        onClose={() => setOpenDrawer(false)}
+        onClose={() => {
+          setUser({} as never)
+          setOpenDrawer(false)
+        }}
       >
         <CustomRow width={"100%"} gap={10}>
           <AvatarContainer>

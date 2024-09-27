@@ -47,8 +47,10 @@ import { assert } from "@/helpers/assert"
 import EmployeeProfile from "@/app/employees/components/EmployeeProfile"
 import Fallback from "./Fallback"
 import Link from "next/link"
-import { MenuProps, message } from "antd"
-import { useSocket } from "@/lib/socket"
+import { MenuProps } from "antd"
+import { w3cwebsocket as W3CWebSocket } from "websocket"
+import { customNotification } from "./custom/customNotification"
+import jsonParse from "@/helpers/jsonParse"
 
 const LogoContainer = styled.div`
   height: 75px;
@@ -115,7 +117,7 @@ const CustomContentContainer = styled.div`
   height: auto;
 
   @media screen and (min-width: 1430px) {
-    max-width: 1100px;
+    max-width: 1090px;
     margin: 0px 34px 10px 460px !important;
   }
 
@@ -147,7 +149,8 @@ interface WrapperProps {
 
 const Wrapper: React.FC<WrapperProps> = (props) => {
   const router = useRouter()
-  const socket = useSocket()
+  // const socket = useSocket()
+  const client = new W3CWebSocket("ws://localhost:8000/ws/notifications")
   const [isPending, startTransition] = useTransition()
   const { setOpenDrawer, open } = useDrawerStore()
   const { setVisible } = useModalStore()
@@ -167,28 +170,43 @@ const Wrapper: React.FC<WrapperProps> = (props) => {
   const canCreate = useIsAuthorized(Number(operationCreate))
 
   useEffect(() => {
-    if (socket) {
-      socket.on("message", (data) => {
-        // eslint-disable-next-line no-console
-        console.log({ message })
-      })
-
-      socket.on("connect", () => {
-        // eslint-disable-next-line no-console
-        console.log("Connected")
-      })
-
-      socket.send("It's amazing!!")
+    client.onopen = () => {
+      client.send(JSON.stringify({ message: "Ahora estoy conectado." }))
     }
 
-    socket?.open()
-
-    return () => {
-      if (socket) {
-        socket.off("message")
-      }
+    client.onmessage = ({ data }) => {
+      const info = jsonParse<Record<string, string>>(data as unknown as string)
+      customNotification({
+        message: "Nueva notificación",
+        description: info?.message,
+        type: "info",
+      })
     }
-  }, [socket])
+  }, [client])
+
+  // useEffect(() => {
+  //   if (socket) {
+  //     socket.on("message", (data) => {
+  //       // eslint-disable-next-line no-console
+  //       console.log({ message })
+  //     })
+
+  //     socket.on("connect", () => {
+  //       // eslint-disable-next-line no-console
+  //       console.log("Connected")
+  //     })
+
+  //     socket.send("It's amazing!!")
+  //   }
+
+  //   socket?.open()
+
+  //   return () => {
+  //     if (socket) {
+  //       socket.off("message")
+  //     }
+  //   }
+  // }, [socket])
 
   useEffect(() => {
     setSelectedMenuOption(getSelectedOption())

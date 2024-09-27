@@ -109,7 +109,7 @@ export default class EmployeesDepartmentChart extends PureComponent<ChartProps> 
     return (
       <CustomSpin spinning={this.props.loading}>
         <Card shadow color={"#f0f4f6"}>
-          <CustomCol xs={24} style={{ height: "450px" }}>
+          <CustomCol xs={24} style={{ height: "460px" }}>
             <CustomRow justify={"center"}>
               <CustomDivider>
                 <CustomTitle level={5}>Empleados por departamentos</CustomTitle>
