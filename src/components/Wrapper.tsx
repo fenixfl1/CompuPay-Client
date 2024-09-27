@@ -176,37 +176,8 @@ const Wrapper: React.FC<WrapperProps> = (props) => {
 
     client.onmessage = ({ data }) => {
       const info = jsonParse<Record<string, string>>(data as unknown as string)
-      customNotification({
-        message: "Nueva notificación",
-        description: info?.message,
-        type: "info",
-      })
     }
   }, [client])
-
-  // useEffect(() => {
-  //   if (socket) {
-  //     socket.on("message", (data) => {
-  //       // eslint-disable-next-line no-console
-  //       console.log({ message })
-  //     })
-
-  //     socket.on("connect", () => {
-  //       // eslint-disable-next-line no-console
-  //       console.log("Connected")
-  //     })
-
-  //     socket.send("It's amazing!!")
-  //   }
-
-  //   socket?.open()
-
-  //   return () => {
-  //     if (socket) {
-  //       socket.off("message")
-  //     }
-  //   }
-  // }, [socket])
 
   useEffect(() => {
     setSelectedMenuOption(getSelectedOption())

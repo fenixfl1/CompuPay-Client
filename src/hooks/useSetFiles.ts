@@ -44,8 +44,6 @@ function useSetFiles(
 
   const handleSetFiles = useCallback(() => {
     if (images.length) {
-      // eslint-disable-next-line no-console
-      console.log({ images })
       form.setFieldsValue({
         [name]: { fileList: images[0] },
       })
