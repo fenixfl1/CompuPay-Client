@@ -1,11 +1,13 @@
 import { CheckboxChangeEvent } from "antd/lib/checkbox"
 
 export const normalizeFiles = (file: any) => {
-  if (Array.isArray(file.fileList)) {
-    return (
-      file.fileList?.filter((item: any) => item.uid === file.file.uid) ?? []
-    )
+  // eslint-disable-next-line no-console
+  console.log({ file })
+  if (Array.isArray(file)) {
+    return file
   }
+
+  return file.fileList
 }
 
 export const normalizeNumber = (value: any) => {

@@ -8,6 +8,7 @@ import {
 import {
   CustomAvatar,
   CustomParagraph,
+  CustomRow,
   CustomSpace,
   CustomTable,
   CustomTag,
@@ -17,6 +18,7 @@ import formatter from "@/helpers/formatter"
 import randomHexColorCode from "@/helpers/random-hex-color-code"
 import useGetPayrollHistory from "@/services/hooks/payroll/useGetPayrollHistory"
 import capitalize from "@/helpers/capitalize"
+import usePayrollStore from "@/stores/payrollStore"
 
 const currencyFormatter = (value: string, record: PayrollEntry) =>
   formatter({
@@ -31,7 +33,11 @@ const PayrollHistoryTable: React.FC = () => {
     mutateAsync: getPayrollHistory,
     data: { data },
   } = useGetPayrollHistory()
+
+  const { payrollInfo } = usePayrollStore()
+
   const expandedRowRender = (record: PayrollHistory) => {
+    const showWithholding = record.CALC_DEDUCTIONS
     const columns: TableColumnsType<PayrollEntry> = [
       {
         key: "AVATAR",
@@ -76,18 +82,21 @@ const PayrollHistoryTable: React.FC = () => {
         render: currencyFormatter,
       },
       {
+        hidden: !showWithholding,
         key: "AFP",
         dataIndex: "AFP",
         title: "AFP",
         render: currencyFormatter,
       },
       {
+        hidden: !showWithholding,
         key: "SFS",
         dataIndex: "SFS",
         title: "SFS",
         render: currencyFormatter,
       },
       {
+        hidden: !showWithholding,
         key: "ISR",
         dataIndex: "ISR",
         title: "ISR",
@@ -96,15 +105,24 @@ const PayrollHistoryTable: React.FC = () => {
       {
         key: "NET_SALARY",
         dataIndex: "NET_SALARY",
-        title: "Salario Neto",
-        render: (_, record) => {
-          const salary = record.SALARY - (record.AFP + record.SFS + record.ISR)
+        title: "Total entregado",
+        render: (_, values) => {
+          if (record.STATUS === "P") return <CustomRow>....</CustomRow>
+          const withholdingValue = showWithholding
+            ? values.AFP + values.SFS + values.ISR
+            : 0
+
+          const salary =
+            values.SALARY / payrollInfo.PAYROLL_CONFIG.PERIODS +
+            values.BONUS -
+            values.DISCOUNT -
+            withholdingValue
           return (
             <span>
               {formatter({
                 value: salary,
                 format: "currency",
-                prefix: record.CURRENCY,
+                prefix: values.CURRENCY,
                 fix: 2,
               })}
             </span>

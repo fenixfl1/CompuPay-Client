@@ -53,13 +53,12 @@ interface EmployeeFormProps {
 }
 
 const EmployeeForm: React.FC<EmployeeFormProps> = ({ loading }) => {
-  const [form] = Form.useForm<Partial<User>>()
-  const avatar = Form.useWatch("AVATAR", form)
+  const [form] = Form.useForm()
   const [currentStep, setCurrentStep] = useState(0)
   const [employee, setEmployee] = useState<Partial<User>>({})
 
   const { visible, setVisible } = useModalStore()
-  const { user, setUser } = useUserStore()
+  const { user, usernameAvailable, identityDocumentAvailable } = useUserStore()
   const { roles } = useRolesStore()
   const { parameters } = useMenuOptionStore<Parameters>()
 
@@ -69,6 +68,7 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ loading }) => {
     useCreateUser()
   const { mutateAsync: updateUser, isPending: isPendingUpdateUser } =
     useUpdateUser()
+
   useEffect(() => {
     if (!user?.USER_ID) return
 
@@ -79,21 +79,17 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ loading }) => {
       HIRED_DATE: user?.HIRED_DATE
         ? (dayjs(user?.HIRED_DATE) as any)
         : undefined,
-      RESUME: user?.RESUME
-        ? (createUploadObject(user?.RESUME ?? "", user) as any)
-        : undefined,
+      RESUME: createUploadObject({
+        base64OrUrl: user?.RESUME,
+        name: `${user.USERNAME}_resume`,
+      }),
       SALARY: user?.GROSS_SALARY,
       GENDER: user.GENDER,
-      AVATAR: { url: user?.AVATAR } as never,
+      AVATAR: createUploadObject({
+        base64OrUrl: user.AVATAR,
+        name: user.USERNAME,
+      }),
     })
-  }, [user])
-
-  useEffect(() => {
-    form.setFieldsValue({
-      AVATAR: !user?.AVATAR?.includes("http")
-        ? { ...(createUploadObject(user?.AVATAR ?? "", user) as any) }
-        : undefined,
-    } as never)
   }, [user])
 
   useEffect(() => {
@@ -127,8 +123,16 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ loading }) => {
       assert<File[]>(data.RESUME)
       assert<File[]>(data.AVATAR)
 
-      data.AVATAR = await getBase64(data.AVATAR?.[0])
-      data.RESUME = await getBase64(data.RESUME?.[0])
+      if (data.AVATAR?.[0]?.["originFileObj" as never]) {
+        data.AVATAR = await getBase64(data.AVATAR?.[0])
+      } else {
+        delete data.AVATAR
+      }
+      if (data.RESUME?.[0]?.["originFileObj" as never]) {
+        data.RESUME = await getBase64(data.RESUME?.[0])
+      } else {
+        delete data.RESUME
+      }
 
       data.PASSWORD = DEFAULT_PASSWORD
       data.ROLES = [data.ROLES] as never
@@ -227,6 +231,7 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ loading }) => {
                 }
               >
                 <CustomButton
+                  disabled={!usernameAvailable || !identityDocumentAvailable}
                   type={"primary"}
                   onClick={handleOnClickNext}
                   icon={<ArrowRightOutlined />}

@@ -11,6 +11,7 @@ import {
   CustomParagraph,
   CustomRadioGroup,
   CustomRow,
+  CustomSearch,
   CustomSpace,
   CustomTag,
   CustomText,
@@ -18,17 +19,23 @@ import {
   CustomTooltip,
 } from "@/components/custom"
 import { CustomModalConfirmation } from "@/components/custom/CustomModalMethods"
+import { useWebSocket } from "@/context/web-socket"
 import { assert } from "@/helpers/assert"
 import capitalize from "@/helpers/capitalize"
 import { compareDate } from "@/helpers/date-helpers"
 import errorHandler from "@/helpers/errorHandler"
 import formatter from "@/helpers/formatter"
 import randomHexColorCode from "@/helpers/random-hex-color-code"
-import { EditConfig } from "@/interfaces/general"
+import useDebounce from "@/hooks/useDebounce"
+import { EditConfig, WebSocketType } from "@/interfaces/general"
 import { Task } from "@/interfaces/task"
+import { User } from "@/interfaces/user"
+import { getSessionInfo } from "@/lib/session"
 import useAddOrRemoveUserFromTask from "@/services/hooks/tasks/useAddOrRemoveUserFromTask"
 import useGetTask from "@/services/hooks/tasks/useGetTask"
 import useUpdateTask from "@/services/hooks/tasks/useUpdateTask"
+import { useGetUserLIst } from "@/services/hooks/user/useGetUserList"
+import { AdvancedCondition } from "@/services/interfaces"
 import useTaskStore from "@/stores/taskStore"
 import useUserStore from "@/stores/userStore"
 import { defaultBreakpoints } from "@/styles/breakpoints"
@@ -40,7 +47,7 @@ import {
   WarningOutlined,
 } from "@ant-design/icons"
 import { Form } from "antd"
-import React, { useEffect, useState } from "react"
+import React, { useCallback, useEffect, useState } from "react"
 import styled from "styled-components"
 
 const TextWrapper = styled.div`
@@ -107,11 +114,14 @@ interface TaskInfoProps {
 }
 
 const TaskInfo: React.FC<TaskInfoProps> = ({ open, onClose }) => {
+  const socket = useWebSocket()
   const [form] = Form.useForm()
 
   const [assignedUsers, setAssignedUsers] = useState<Task["ASSIGNED_USERS"]>([])
   const [selectedUsers, setSelectedUsers] = useState<string[]>([])
   const [openSelectUserModal, setOpenSelectUserModal] = useState<boolean>()
+  const [searchKey, setSearchKey] = useState("")
+  const debounce = useDebounce(searchKey)
 
   const { task } = useTaskStore()
   const { users } = useUserStore()
@@ -121,6 +131,27 @@ const TaskInfo: React.FC<TaskInfoProps> = ({ open, onClose }) => {
   const { mutateAsync: updateTask } = useUpdateTask()
   const { mutate: getTask } = useGetTask()
   const { mutateAsync: addOrRemoveUser } = useAddOrRemoveUserFromTask()
+  const { mutateAsync: getUserList } = useGetUserLIst()
+
+  const handleGetUsers = useCallback(() => {
+    const condition: AdvancedCondition<User>[] = [
+      {
+        dataType: "list",
+        field: "STATE",
+        operator: "IN",
+        condition: ["A", "P"],
+      },
+      {
+        dataType: "str",
+        field: ["NAME", "LAST_NAME", "USERNAME", "EMAIL"],
+        operator: "ILIKE",
+        condition: debounce,
+      },
+    ]
+    getUserList({ condition, page: 1, size: 20 })
+  }, [debounce])
+
+  useEffect(handleGetUsers, [handleGetUsers])
 
   useEffect(() => {
     form.setFieldsValue({
@@ -160,6 +191,17 @@ const TaskInfo: React.FC<TaskInfoProps> = ({ open, onClose }) => {
         [key]: value,
       })
 
+      if (socket) {
+        socket.send(
+          JSON.stringify({
+            message: `@${getSessionInfo().USERNAME}@ hizo una actualización a la tarea #${task.NAME}#`,
+            receivers: task.ASSIGNED_USERS?.map((item) => item.USERNAME).filter(
+              (item) => item !== getSessionInfo().USERNAME
+            ),
+          })
+        )
+      }
+
       handelGetTask()
     } catch (error) {
       errorHandler(error)
@@ -172,6 +214,22 @@ const TaskInfo: React.FC<TaskInfoProps> = ({ open, onClose }) => {
         TASK_ID: task.TASK_ID,
         ASSIGNED_USERS: selectedUsers,
       })
+
+      if (socket) {
+        socket.send(
+          JSON.stringify({
+            message: `@${getSessionInfo().USERNAME}@ te agrego a la tarea #${task.NAME}#`,
+            receivers: selectedUsers
+              .filter(
+                (item) =>
+                  !task.ASSIGNED_USERS.map((item) => item.USERNAME).includes(
+                    item
+                  )
+              )
+              .filter((item) => item !== getSessionInfo().USERNAME),
+          })
+        )
+      }
 
       handelGetTask()
       setOpenSelectUserModal(false)
@@ -338,6 +396,11 @@ const TaskInfo: React.FC<TaskInfoProps> = ({ open, onClose }) => {
         }}
       >
         <Container>
+          <CustomSearch
+            placeholder={"Buscar empleados"}
+            onChange={(event) => setSearchKey(event.target.value)}
+          />
+          <CustomDivider />
           <CustomCheckboxGroup
             value={selectedUsers}
             options={userOptions}

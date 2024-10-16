@@ -1,5 +1,12 @@
+export const BASE_WEB_SOCKET_URL = process.env.NEXT_PUBLIC_APP_WEB_SOCKET_URL
+export const SOCKET_NOTIFICATION_URL = `${BASE_WEB_SOCKET_URL}notifications`
+
 export const BASE_WEB_API_URL = process.env.NEXT_PUBLIC_APP_WEB_API_URL
 export const WEB_API_PATH_LOGIN = "users/login/"
+export const WEB_API_PATH_CHECK_USERNAME = "users/check_username/"
+export const WEB_API_PATH_CHECK_IDENTITY_DOCUMENT =
+  "users/check_identity_document/"
+export const WEB_API_PATH_UPDATE_AVATAR = "users/update_avatar/"
 export const WEB_API_API_PATH_GET_MENU_OPTIONS = "users/menu_options/"
 export const WEB_API_GET_USER_LIST = "users/list_users"
 export const WEB_API_CREATE_USER = "users/create_user/"
@@ -38,6 +45,8 @@ export const WEB_API_GET_SALARY_BY_DEPARTMENT =
   "dashboard/salary_by_department/"
 export const WEB_API_GET_PAYMENT_DIST_BY_MONTH =
   "dashboard/get_payroll_payment_detail/"
+export const WEB_API_GET_NOTIFICATIONS = "notifications/get_notifications"
+export const WEB_API_MARK_NOTIFICATIONS_AS_READ = "notifications/mark_as_read"
 
 // internal routes
 export const PATH_LOGIN = "/login"

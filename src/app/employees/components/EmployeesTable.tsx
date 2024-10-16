@@ -47,6 +47,8 @@ import dayjs from "dayjs"
 import { FormInstance } from "antd/lib"
 import { PopoverContainer } from "@/components/custom/CustomPopover"
 import FilterTemplate from "@/components/FilterTemplate"
+import useUserStore from "@/stores/userStore"
+import useGetDepartmentList from "@/services/hooks/user/useGetDepartmentList"
 
 const Tag = styled(CustomTag)`
   min-width: 70px;
@@ -210,13 +212,11 @@ const EmployeesTable: React.FC<EmployeeTableProps> = ({
   const { setVisible, visible } = useModalStore()
   const { parameters } = useMenuOptionStore<EmployeesParameters>()
   const { roles } = useRolesStore()
+  const { setUser, setDocumentAvailable, setUsernameAvailable } = useUserStore()
 
   const { mutateAsync: getUser, isPending: getUserIsPending } = useGetUser()
   const { mutateAsync: changeUserState, isPending } = useChangeUserState()
-
-  const currencyFormatter = (value = 0) => {
-    return formatter({ value, format: "currency", prefix: "RD$", fix: 2 })
-  }
+  const { mutate: getDepartments, data: departments } = useGetDepartmentList()
 
   const allowEdit = useIsAuthorized(
     Number(parameters?.ID_OPERACION_EDITAR_EMPLEADOS)
@@ -224,6 +224,23 @@ const EmployeesTable: React.FC<EmployeeTableProps> = ({
   const allowChangeState = useIsAuthorized(
     Number(parameters?.ID_OPERACION_CAMBIAR_ESTADO_EMPLEADOS)
   )
+
+  useEffect(() => {
+    if (!visible) {
+      setUser({} as User)
+      setDocumentAvailable(false)
+      setUsernameAvailable(false)
+    }
+  }, [visible])
+
+  useEffect(() => {
+    getDepartments({
+      fields: ["DEPARTMENT_ID", "NAME"],
+      condition: {
+        STATE: "A",
+      },
+    })
+  }, [])
 
   useEffect(() => {
     setFilterCount(
@@ -304,6 +321,22 @@ const EmployeesTable: React.FC<EmployeeTableProps> = ({
               options={roles.map((rol) => ({
                 label: rol.NAME,
                 value: rol.ROL_ID,
+              }))}
+            />
+          </CustomFormItem>
+        </CustomCol>
+        <CustomCol xs={24}>
+          <CustomFormItem
+            layout="vertical"
+            label={<CustomText strong>Departamentos</CustomText>}
+            name={"DEPARTMENTS"}
+          >
+            <CustomSelect
+              mode={"multiple"}
+              placeholder={"Seleccionar departamentos"}
+              options={departments.map((department) => ({
+                label: department.NAME,
+                value: department.DEPARTMENT_ID,
               }))}
             />
           </CustomFormItem>
@@ -410,7 +443,7 @@ const EmployeesTable: React.FC<EmployeeTableProps> = ({
       width: "8%",
       render: (roles: Roles[]) => (
         <CustomSpace size={1} wrap={false} direction="horizontal">
-          {roles.map((role) => (
+          {roles?.map((role) => (
             <CustomTag
               color={role.COLOR}
               key={role.ROL_ID}
@@ -433,7 +466,7 @@ const EmployeesTable: React.FC<EmployeeTableProps> = ({
       })),
       render: (value: string) => (
         <CustomSpace wrap={false} direction="horizontal" size={1}>
-          <Tag color={states[value].color}>{states[value].label}</Tag>
+          <Tag color={states[value]?.color}>{states[value]?.label}</Tag>
 
           <DownOutlined style={{ color: "#bfbfbf", fontSize: 10 }} />
         </CustomSpace>

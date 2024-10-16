@@ -44,6 +44,7 @@ import ChangePasswordForm from "./ChangePasswordForm"
 import useChangePassword from "@/services/hooks/user/useChangePassword"
 import { customNotification } from "@/components/custom/customNotification"
 import ChangeProfilePicForm from "./ChangeProfilePicForm"
+import useUpdateAvatar from "@/services/hooks/user/useUpdateAvatar"
 
 const AvatarContainer = styled(CustomCard)`
   height: 150px;
@@ -71,7 +72,7 @@ const DocumentContainer = styled(CustomCard)`
 
 const EmployeeProfile: React.FC = () => {
   const [form] = Form.useForm()
-  const fileList: UploadFile = Form.useWatch("AVATAR_FILE", form)
+  const file = Form.useWatch("AVATAR_FILE", form)
   const [fileExtension, setFileExtension] = useState("")
   const [changePasswordModal, setChangePasswordModal] = useState(false)
   const [showChangeProfileOptions, setShowChangeProfileOptions] =
@@ -79,7 +80,7 @@ const EmployeeProfile: React.FC = () => {
   const { user, setUser } = useUserStore()
   const { open, setOpenDrawer } = useDrawerStore()
 
-  const { mutateAsync: updateUser, isPending } = useUpdateUser()
+  const { mutateAsync: updateAvatar, isPending } = useUpdateAvatar()
   const { mutateAsync: changePassword, isPending: changePasswordIsPending } =
     useChangePassword()
 
@@ -97,18 +98,23 @@ const EmployeeProfile: React.FC = () => {
 
       let url = data.AVATAR_URL
 
-      if (fileList?.uid) {
-        url = await getBase64(fileList)
+      if (file) {
+        url = await getBase64(file.fileList[0])
       }
 
-      await updateUser({ USER_ID: user.USER_ID, AVATAR: url })
+      await updateAvatar({ USERNAME: user.USERNAME, AVATAR: url })
 
+      sessionStorage.setItem("avatar", url)
       form.resetFields()
+      customNotification({
+        message: 'Operación Exitosa',
+        description: "Foto de perfil actualizada con éxito."
+      })
       setShowChangeProfileOptions(false)
     } catch (error) {
       errorHandler(error)
     }
-  }, [fileList, form])
+  }, [file, form])
 
   useEffect(() => {
     handleUpdateUser
@@ -228,7 +234,6 @@ const EmployeeProfile: React.FC = () => {
     {
       key: "ROLES",
       label: "Rol",
-      span: 2,
       children: (
         <CustomSpace direction="horizontal" wrap>
           {user.ROLES.map((role) => (
@@ -238,6 +243,11 @@ const EmployeeProfile: React.FC = () => {
           ))}
         </CustomSpace>
       ),
+    },
+    {
+      key: "DEPARTMENT",
+      label: "Departamento",
+      children: user.DESC_DEPARTMENT,
     },
     {
       key: "HIRED_DATE",
@@ -261,7 +271,7 @@ const EmployeeProfile: React.FC = () => {
     },
     {
       key: "TAXES",
-      label: "Impuestos",
+      label: "Deducciones",
       children: formatter({
         value: user.TAX,
         format: "currency",
@@ -283,7 +293,7 @@ const EmployeeProfile: React.FC = () => {
     {
       key: "SUPERVISOR",
       label: "Supervisor",
-      children: user.SUPERVISOR,
+      children: `@${user.SUPERVISOR}`,
     },
   ]
 

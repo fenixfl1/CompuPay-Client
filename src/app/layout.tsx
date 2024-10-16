@@ -15,6 +15,7 @@ import { antTheme, defaultTheme } from "@/styles/themes"
 import { App, ConfigProvider } from "antd"
 import moment from "moment"
 import "moment/locale/es"
+import { WebSocketProvider } from "@/context/web-socket"
 
 moment.locale("es")
 
@@ -35,25 +36,27 @@ const RootLayout: React.FC<React.PropsWithChildren> = ({ children }) => {
   return (
     <html lang={"en"}>
       <body>
-        <QueryClientProvider client={queryClient}>
-          <StyledComponentsRegistry>
-            <GlobalStyles />
-            <AntdRegistry>
-              <App>
-                <ConfigProvider theme={{ ...antTheme }}>
-                  <ConditionalComponent
-                    condition={demLoaded}
-                    fallback={<Fallback />}
-                  >
-                    <ThemeProvider theme={defaultTheme}>
-                      <Wrapper>{children}</Wrapper>
-                    </ThemeProvider>
-                  </ConditionalComponent>
-                </ConfigProvider>
-              </App>
-            </AntdRegistry>
-          </StyledComponentsRegistry>
-        </QueryClientProvider>
+        <WebSocketProvider>
+          <QueryClientProvider client={queryClient}>
+            <StyledComponentsRegistry>
+              <GlobalStyles />
+              <AntdRegistry>
+                <App>
+                  <ConfigProvider theme={{ ...antTheme }}>
+                    <ConditionalComponent
+                      condition={demLoaded}
+                      fallback={<Fallback />}
+                    >
+                      <ThemeProvider theme={defaultTheme}>
+                        <Wrapper>{children}</Wrapper>
+                      </ThemeProvider>
+                    </ConditionalComponent>
+                  </ConfigProvider>
+                </App>
+              </AntdRegistry>
+            </StyledComponentsRegistry>
+          </QueryClientProvider>
+        </WebSocketProvider>
       </body>
     </html>
   )

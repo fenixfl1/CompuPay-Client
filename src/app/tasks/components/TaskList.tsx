@@ -35,7 +35,8 @@ import useUpdateTaskState from "@/services/hooks/tasks/useUpdateTaskState"
 import TaskInfo from "./TaskInfo"
 import useGetTask from "@/services/hooks/tasks/useGetTask"
 import { AdvancedCondition } from "@/services/interfaces"
-import { useSocket } from "@/lib/socket"
+import { getSessionInfo } from "@/lib/session"
+import { useWebSocket } from "@/context/web-socket"
 
 const TaskGrid = styled.div`
   width: 100%;
@@ -88,6 +89,7 @@ const prioritiesOptions = Object.keys(priorities).map((key) => ({
 }))
 
 const TaskList: React.FC = () => {
+  const socket = useWebSocket()
   const [form] = Form.useForm()
   const priority = Form.useWatch("PRIORITY", form)
   const searchKeys = Form.useWatch("SEARCH_OPTIONS", form)
@@ -171,6 +173,22 @@ const TaskList: React.FC = () => {
         COMPLETED: !task.COMPLETED,
       })
 
+      const receivers = task.ASSIGNED_USERS.map((user) => user.USERNAME)
+      receivers.push(task.CREATED_BY)
+
+      if (socket) {
+        socket.send(
+          JSON.stringify({
+            message: `La tarea #NO.${task.TASK_ID} - ${task.NAME}# ha sido marcada como ${task.COMPLETED ? "completada" : "No completada"} por @${getSessionInfo().USERNAME} `,
+            receivers: Array.from(
+              new Set(
+                receivers.filter((item) => item !== getSessionInfo().USERNAME)
+              )
+            ),
+          })
+        )
+      }
+
       setShouldUpdate(!shouldUpdate)
     } catch (error) {
       errorHandler(error)
@@ -251,7 +269,7 @@ const TaskList: React.FC = () => {
                     </ConditionalComponent>
                   </CustomSpace>
                 </CustomCol>
-                <CustomCol xs={24} sm={18} md={16} lg={12} xl={8}>
+                <CustomCol xs={24} lg={12} xl={8}>
                   <CustomSearch
                     placeholder={"Buscar tareas"}
                     onChange={({ target }) => setSearchValue(target.value)}

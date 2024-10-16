@@ -1,6 +1,6 @@
 import React, { cloneElement } from "react"
 import { AnyType, TriggersType } from "../constants/types"
-import { CustomModalError } from "./custom/CustomModalMethods"
+import { CustomModalWarning } from "./custom/CustomModalMethods"
 
 type Triggers = {
   [key in keyof TriggersType]: (e: AnyType) => void
@@ -31,8 +31,8 @@ const ConditionalComponent: React.FC<ConditionalComponentProps> = ({
       }
       ;(props as AnyType)?.[trigger]?.(e)
     } else if (visible && message) {
-      CustomModalError({
-        title: "Error",
+      CustomModalWarning({
+        title: "Aviso",
         content: message,
       })
     }

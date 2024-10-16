@@ -7,8 +7,10 @@ import {
   COOKIE_KEY_USER_DATA,
   COOKIE_KEY_USER_PICTURE,
   COOKIE_KEY_AVATAR,
+  COOKIE_KEY_DARK_MODE,
 } from "@/constants/cookieKeys"
 import jsonParse from "@/helpers/jsonParse"
+import errorHandler from "@/helpers/errorHandler"
 
 const sessionCookies: Record<string, string> = {
   COOKIE_KEY_USERNAME,
@@ -24,26 +26,28 @@ const isLoggedIn = (): boolean => {
 }
 
 const createSession = (data: SessionPayload): void => {
-  const { AVATAR, SESSION_COOKIE, USERNAME, ...userData } = data
+  try {
+    const { AVATAR, SESSION_COOKIE, USERNAME, ...userData } = data
 
-  const { token, expires } = SESSION_COOKIE
+    const { token, expires } = SESSION_COOKIE
 
-  Cookies.set(sessionCookies.COOKIE_KEY_USERNAME, USERNAME, {
-    expires: new Date(expires),
-  })
-  Cookies.set(sessionCookies.COOKIE_KEY_SESSION_TOKEN, token, {
-    expires: new Date(expires),
-  })
-  Cookies.set(sessionCookies.COOKIE_KEY_AVATAR, AVATAR, {
-    expires: new Date(expires),
-  })
-  Cookies.set(
-    sessionCookies.COOKIE_KEY_USER_DATA,
-    JSON.stringify({ ...userData, USERNAME, AVATAR, token }),
-    {
+    sessionStorage.setItem("avatar", AVATAR)
+    Cookies.set(sessionCookies.COOKIE_KEY_USERNAME, USERNAME, {
       expires: new Date(expires),
-    }
-  )
+    })
+    Cookies.set(sessionCookies.COOKIE_KEY_SESSION_TOKEN, token, {
+      expires: new Date(expires),
+    })
+    Cookies.set(
+      sessionCookies.COOKIE_KEY_USER_DATA,
+      JSON.stringify({ ...userData, USERNAME, token }),
+      {
+        expires: new Date(expires),
+      }
+    )
+  } catch (error) {
+    errorHandler(error)
+  }
 }
 
 const removeSession = (): void => {
@@ -60,9 +64,12 @@ const getSessionToken = (): string => {
 }
 
 const getSessionInfo = (): SessionPayload => {
-  return isLoggedIn()
-    ? JSON.parse(Cookies.get(sessionCookies.COOKIE_KEY_USER_DATA) as string)
-    : {}
+  if (!isLoggedIn()) return <SessionPayload>{}
+  const userData = JSON.parse(
+    Cookies.get(sessionCookies.COOKIE_KEY_USER_DATA) as string
+  )
+  const avatar = sessionStorage.getItem("avatar")
+  return { ...userData, AVATAR: avatar }
 }
 
 const getSessionUsername = (): string => {
@@ -102,6 +109,14 @@ const getCurrentOptionMenu = (): MenuOption | undefined => {
   )
 
   return option
+}
+
+export const setDarkMode = (value: boolean) => {
+  Cookies.set(COOKIE_KEY_DARK_MODE, value.toString())
+}
+
+export const getDarkMode = (): boolean => {
+  return Cookies.get(COOKIE_KEY_DARK_MODE) === "true"
 }
 
 export {

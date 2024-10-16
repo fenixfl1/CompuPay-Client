@@ -13,11 +13,15 @@ import {
   CustomDatePicker,
 } from "@/components/custom"
 import CustomInputGroup from "@/components/custom/CustomInputGroup"
+import errorHandler from "@/helpers/errorHandler"
 import {
   normalizeFiles,
   normalizeMaskedInput,
 } from "@/helpers/form-item-normalizers"
-import replaceAccentedVowels from "@/helpers/replaceAccentedVowels"
+import { ValidateStatus } from "@/interfaces/general"
+import { User } from "@/interfaces/user"
+import useCheckIdentityDocument from "@/services/hooks/user/useCheckIdentityDocument"
+import useCheckUsername from "@/services/hooks/user/useCheckUsername"
 import useUserStore from "@/stores/userStore"
 import {
   defaultBreakpoints,
@@ -25,8 +29,9 @@ import {
   labelColFullWidth,
 } from "@/styles/breakpoints"
 import { Form, FormInstance } from "antd"
+import { isAxiosError } from "axios"
 import dayjs from "dayjs"
-import React, { useEffect, useMemo } from "react"
+import React, { useEffect, useState } from "react"
 
 const maskType = {
   C: "cedula",
@@ -37,39 +42,74 @@ interface PersonalInformationProps {
 }
 
 const PersonalInformation: React.FC<PersonalInformationProps> = ({ form }) => {
-  const name = Form.useWatch("NAME", form)
-  const lastName = Form.useWatch("LAST_NAME", form)
   const typeDocument = Form.useWatch("DOCUMENT_TYPE", form)
 
-  const { user } = useUserStore()
+  const [validateStatus, setValidateStatus] = useState<ValidateStatus>("")
+  const [validateDocStatus, setValidateDocStatus] = useState<ValidateStatus>("")
 
-  const generateUsername = useMemo(() => {
-    if (!name || !lastName) return ""
-    // Prefijos comunes que deben ser ignorados en los apellidos
-    const prefixes = ["de", "del", "la", "las", "los", "y"]
+  const { mutateAsync: checkUsername } = useCheckUsername()
+  const { mutateAsync: checkIdentityDocument } = useCheckIdentityDocument()
 
-    // Obtener la inicial del nombre
-    const initial = replaceAccentedVowels(name.charAt(0)).toLowerCase()
+  const { user, setDocumentAvailable, setUsernameAvailable } = useUserStore()
 
-    // Dividir el apellido en partes
-    const lastNameParts = replaceAccentedVowels(lastName)
-      .toLowerCase()
-      .split(" ")
-
-    // Encontrar la primera parte significativa del apellido
-    let significantPart = ""
-    for (const part of lastNameParts) {
-      if (!prefixes.includes(part)) {
-        significantPart = part
-        break
-      }
-    }
-    return `${initial}${significantPart}`
-  }, [name, lastName])
+  const isEditing = !!user.USER_ID
 
   useEffect(() => {
-    form.setFieldsValue({ USERNAME: generateUsername })
-  }, [generateUsername])
+    if (user.USER_ID) {
+      setDocumentAvailable(true)
+      setUsernameAvailable(true)
+    }
+  }, [user])
+
+  const handleCheckUsername = async (
+    event: React.FocusEvent<HTMLInputElement, Element>
+  ) => {
+    try {
+      const { value } = event.target
+      if (!value) return
+
+      setValidateStatus("validating")
+      await checkUsername({ USERNAME: value })
+      setValidateStatus("success")
+    } catch (error) {
+      if (isAxiosError(error)) {
+        form.setFields([
+          {
+            name: "USERNAME",
+            errors: [error?.response?.data.message],
+          },
+        ])
+      }
+      setValidateStatus("error")
+      errorHandler(error)
+    }
+  }
+
+  const handleCheckIdentityDocument = async (
+    event: React.FocusEvent<HTMLInputElement, Element>
+  ) => {
+    try {
+      const value = event.target.value.replace(/\D/g, "")
+      if (!value) return
+      setValidateDocStatus("validating")
+      await checkIdentityDocument({
+        IDENTITY_DOCUMENT: value,
+      })
+      setValidateDocStatus("success")
+    } catch (error) {
+      if (isAxiosError(error)) {
+        form.setFields([
+          {
+            name: "IDENTITY_DOCUMENT",
+            validated: true,
+            errors: [error?.response?.data.message],
+          },
+        ])
+      }
+      setValidateDocStatus("error")
+      errorHandler(error)
+    }
+  }
 
   return (
     <CustomForm form={form} {...formItemLayout} style={{ width: "100%" }}>
@@ -87,6 +127,7 @@ const PersonalInformation: React.FC<PersonalInformationProps> = ({ form }) => {
             {...labelColFullWidth}
             label={"Doc. Identidad"}
             rules={[{ required: true }]}
+            required
           >
             <CustomInputGroup>
               <CustomFormItem
@@ -94,8 +135,10 @@ const PersonalInformation: React.FC<PersonalInformationProps> = ({ form }) => {
                 name={"DOCUMENT_TYPE"}
                 label={"Tipo de documento"}
                 initialValue={"C"}
+                rules={[{ required: true }]}
               >
                 <CustomSelect
+                  disabled={isEditing}
                   width={"20%"}
                   placeholder={"Tipo de documento"}
                   options={[
@@ -109,12 +152,16 @@ const PersonalInformation: React.FC<PersonalInformationProps> = ({ form }) => {
                 name={"IDENTITY_DOCUMENT"}
                 label={"Número de documento"}
                 noSymbol={typeDocument === "P"}
+                validateStatus={validateDocStatus}
+                hasFeedback
                 rules={[{ required: true, len: 11 }]}
                 getValueFromEvent={
                   typeDocument === "C" ? normalizeMaskedInput : undefined
                 }
               >
                 <CustomMaskedInput
+                  disabled={isEditing}
+                  onBlur={handleCheckIdentityDocument}
                   type={maskType[typeDocument as never] || "cedula"}
                   width={"80%"}
                   placeholder={"Documento de identidad"}
@@ -169,9 +216,16 @@ const PersonalInformation: React.FC<PersonalInformationProps> = ({ form }) => {
             onlyString
             label={"Usuario"}
             name={"USERNAME"}
+            validateStatus={validateStatus}
+            hasFeedback
             rules={[{ required: true }]}
           >
-            <CustomInput prefix={"@"} placeholder={"Nombre de usuario"} />
+            <CustomInput
+              disabled={isEditing}
+              prefix={"@"}
+              placeholder={"Nombre de usuario"}
+              onBlur={handleCheckUsername}
+            />
           </CustomFormItem>
         </CustomCol>
         <CustomCol {...defaultBreakpoints}>
@@ -207,7 +261,6 @@ const PersonalInformation: React.FC<PersonalInformationProps> = ({ form }) => {
             <CustomTextArea placeholder={"Dirección"} />
           </CustomFormItem>
         </CustomCol>
-        {/* <ConditionalComponent condition={!user.USER_ID}> */}
         <CustomCol {...defaultBreakpoints}>
           <CustomFormItem
             label={"Foto de Perfil"}
@@ -215,19 +268,9 @@ const PersonalInformation: React.FC<PersonalInformationProps> = ({ form }) => {
             getValueFromEvent={normalizeFiles}
             valuePropName={"fileList"}
           >
-            <CustomUpload
-              fileList={
-                [
-                  {
-                    url: "https://static.vecteezy.com/system/resources/previews/006/487/917/original/man-avatar-icon-free-vector.jpg",
-                  },
-                ] as never
-              }
-              accept={"image/*"}
-            />
+            <CustomUpload accept={"image/*"} />
           </CustomFormItem>
         </CustomCol>
-        {/* </ConditionalComponent> */}
       </CustomRow>
     </CustomForm>
   )

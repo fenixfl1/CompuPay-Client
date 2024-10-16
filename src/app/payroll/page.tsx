@@ -2,6 +2,7 @@
 
 import {
   CustomCol,
+  CustomCollapse,
   CustomDivider,
   CustomRow,
   CustomSpin,
@@ -50,25 +51,33 @@ const page: NextPage = () => {
     <>
       <CustomSpin spinning={isGetInfoPending}>
         <CustomCol xs={24}>
-          <CustomRow
-            width={"100%"}
-            gap={10}
-            justify={"space-between"}
-            style={{ marginTop: "10px" }}
-          >
-            <CustomStatistic
-              title={"Periodo de Nómina"}
-              value={payrollInfo.LABEL}
-            />
-            <CustomStatistic
-              title={"Próximo pago"}
-              value={payrollInfo.NEXT_PAYMENT}
-            />
-            <CustomDivider />
-            <CustomCol xs={24}>
-              <CustomTabs destroyInactiveTabPane items={items} />
-            </CustomCol>
-          </CustomRow>
+          <CustomCollapse
+            expandIcon={() => null}
+            defaultActiveKey={[1]}
+            items={[
+              {
+                key: 1,
+                collapsible: "disabled",
+                children: (
+                  <CustomCol xs={24}>
+                    <CustomTabs destroyInactiveTabPane items={items} />
+                  </CustomCol>
+                ),
+                label: (
+                  <CustomRow justify={"space-between"}>
+                    <CustomStatistic
+                      title={"Periodo de Nómina"}
+                      value={payrollInfo.LABEL}
+                    />
+                    <CustomStatistic
+                      title={"Próximo pago"}
+                      value={payrollInfo.NEXT_PAYMENT}
+                    />
+                  </CustomRow>
+                ),
+              },
+            ]}
+          />
         </CustomCol>
       </CustomSpin>
 

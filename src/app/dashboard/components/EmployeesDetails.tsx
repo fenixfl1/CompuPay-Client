@@ -173,7 +173,7 @@ const EmployeesDetails: React.FC = (): React.ReactElement => {
 
         <Card width={"100%"} height={"217px"} color={"#f0f4f6"}>
           <CustomDivider>
-            <CustomText strong>Empleados activos</CustomText>
+            <CustomText strong>Contrataciones</CustomText>
           </CustomDivider>
           <LineChart width={400} height={180} data={line_chart}>
             <XAxis dataKey="month" />

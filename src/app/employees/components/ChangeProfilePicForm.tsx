@@ -10,6 +10,7 @@ import {
 } from "@/components/custom"
 import CustomFrom from "@/components/custom/CustomFrom"
 import CustomInputGroup from "@/components/custom/CustomInputGroup"
+import { normalizeFiles } from "@/helpers/form-item-normalizers"
 import { formItemLayout } from "@/styles/breakpoints"
 import { BulbOutlined } from "@ant-design/icons"
 import { FormInstance } from "antd"
@@ -71,7 +72,12 @@ const ChangeProfilePicForm: React.FC<ChangeProfilePicFormProps> = ({
                   />
                 </CustomFormItem>
                 <CustomTooltip title={"Cargar image desde mi dispositivo"}>
-                  <CustomFormItem noStyle name={"AVATAR_FILE"}>
+                  <CustomFormItem
+                    noStyle
+                    name={"AVATAR_FILE"}
+                    normalize={normalizeFiles}
+                    valuePropName={"fileList"}
+                  >
                     <CustomUpload listType={"text"} accept={"image/*"} />
                   </CustomFormItem>
                 </CustomTooltip>

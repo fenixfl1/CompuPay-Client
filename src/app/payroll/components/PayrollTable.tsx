@@ -7,7 +7,6 @@ import {
   CustomForm,
   CustomFormItem,
   CustomInputNumber,
-  CustomPopConfirm,
   CustomPopover,
   CustomRow,
   CustomSearch,
@@ -20,7 +19,7 @@ import {
 } from "@/components/custom"
 import formatter from "@/helpers/formatter"
 import useDebounce from "@/hooks/useDebounce"
-import { Payroll, PayrollEntry } from "@/interfaces/payroll"
+import { PayrollEntry, PayrollParameters } from "@/interfaces/payroll"
 import useGetPayrollEntries from "@/services/hooks/payroll/useGetPayrollEntries"
 import { AdvancedCondition } from "@/services/interfaces"
 import usePayrollStore from "@/stores/payrollStore"
@@ -38,13 +37,16 @@ import useUpdatePayrollEntry from "@/services/hooks/payroll/useUpdatePayrollEntr
 import { customNotification } from "@/components/custom/customNotification"
 import { TableRowSelection } from "antd/es/table/interface"
 import makePagination from "@/helpers/pagination"
-import { PopoverContainer } from "@/components/custom/CustomPopover"
 import { Form } from "antd"
-import { defaultBreakpoints, formItemLayout } from "@/styles/breakpoints"
 import FilterTemplate from "@/components/FilterTemplate"
 import useProcessPartialPayroll from "@/services/hooks/payroll/useProcessPartialPayroll"
 import CustomInputGroup from "@/components/custom/CustomInputGroup"
 import { CustomModalConfirmation } from "@/components/custom/CustomModalMethods"
+import useMenuOptionStore from "@/stores/useMenuOptionStore"
+import useIsAuthorized from "@/hooks/useIsAuthorized"
+import ConditionalComponent from "@/components/ConditionalComponent"
+import { useWebSocket } from "@/context/web-socket"
+import moment from "moment"
 
 const optionStyles: React.CSSProperties = {
   width: "100%",
@@ -103,12 +105,17 @@ interface PayrollTableProps {
 const PayrollTable: React.FC<PayrollTableProps> = ({ payrollId }) => {
   const [form] = Form.useForm()
   const action = Form.useWatch("ACTION", form)
+
+  const socket = useWebSocket()
+
   const [searchValue, setSearchValue] = useState("")
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const [shouldUpdate, setShouldUpdate] = useState(false)
   const debounce = useDebounce(searchValue)
 
-  const { entries, metadata } = usePayrollStore()
+  const { parameters } = useMenuOptionStore<PayrollParameters>()
+  const { entries, metadata, payrollInfo } = usePayrollStore()
+
   const { mutateAsync: updatePayrollEntry, isPending: isUpdatePending } =
     useUpdatePayrollEntry()
   const { mutateAsync: getPayrollEntries, isPending: isGetEntriesPending } =
@@ -117,6 +124,15 @@ const PayrollTable: React.FC<PayrollTableProps> = ({ payrollId }) => {
     mutateAsync: processPartialPayroll,
     isPending: isProcessPartialPending,
   } = useProcessPartialPayroll()
+
+  const { OPERATION_ID_PROCESS_PAYROLL, OPERATION_ID_REMOVE_PAYROLL_ENTRY } =
+    parameters
+
+  const allowProcess = useIsAuthorized(Number(OPERATION_ID_PROCESS_PAYROLL))
+  const allowRemove = useIsAuthorized(Number(OPERATION_ID_REMOVE_PAYROLL_ENTRY))
+
+  const showWithholding =
+    payrollInfo.CURRENT_PERIOD === payrollInfo?.PAYROLL_CONFIG?.PERIODS
 
   const handleOnSearch = useCallback(
     (page = metadata?.page, size = metadata?.page_size) => {
@@ -208,6 +224,20 @@ const PayrollTable: React.FC<PayrollTableProps> = ({ payrollId }) => {
         type: "success",
       })
 
+      if (socket) {
+        socket.send(
+          JSON.stringify({
+            receivers: [record.USER],
+            message: `
+              Estimado/a @${record.FULL_NAME}@,
+              Nos complace informarte que tu nómina correspondiente al período del #${moment(payrollInfo.PERIOD_START)}# al #${moment(payrollInfo.PERIOD_END)}# 
+              ha sido procesada exitosamente.
+              Si tienes alguna duda sobre los detalles del pago, por favor no dudes en contactar al departamento de Recursos Humanos.
+            `,
+          })
+        )
+      }
+
       setShouldUpdate(!shouldUpdate)
     } catch (error) {
       errorHandler(error)
@@ -238,16 +268,31 @@ const PayrollTable: React.FC<PayrollTableProps> = ({ payrollId }) => {
               break
             }
             case "P": {
+              const users = entries
+                .filter((entry) =>
+                  selectedRowKeys.includes(entry.PAYROLL_ENTRY_ID)
+                )
+                .map((item) => item.USER)
               const response = await processPartialPayroll({
                 condition: {
                   PAYROLL_ID: payrollId,
-                  USERS: entries
-                    .filter((entry) =>
-                      selectedRowKeys.includes(entry.PAYROLL_ENTRY_ID)
-                    )
-                    .map((item) => item.USER),
+                  USERS: users,
                 },
               })
+
+              if (socket) {
+                socket.send(
+                  JSON.stringify({
+                    receivers: users,
+                    message: `
+                      Estimado/a,
+                      Nos complace informarte que tu nómina correspondiente al período del #${moment(payrollInfo.PERIOD_START)}# al #${moment(payrollInfo.PERIOD_END)}# 
+                      ha sido procesada exitosamente.
+                      Si tienes alguna duda sobre los detalles del pago, por favor no dudes en contactar al departamento de Recursos Humanos.
+                    `,
+                  })
+                )
+              }
 
               customNotification({
                 message: "Operación exitosa",
@@ -322,18 +367,21 @@ const PayrollTable: React.FC<PayrollTableProps> = ({ payrollId }) => {
       render: currencyFormatter,
     },
     {
+      hidden: !showWithholding,
       key: "AFP",
       dataIndex: "AFP",
       title: "AFP",
       render: currencyFormatter,
     },
     {
+      hidden: !showWithholding,
       key: "SFS",
       dataIndex: "SFS",
       title: "SFS",
       render: currencyFormatter,
     },
     {
+      hidden: !showWithholding,
       key: "ISR",
       dataIndex: "ISR",
       title: "ISR",
@@ -342,9 +390,25 @@ const PayrollTable: React.FC<PayrollTableProps> = ({ payrollId }) => {
     {
       key: "NET_SALARY",
       dataIndex: "NET_SALARY",
-      title: "Salario Neto",
+      title: (
+        <CustomTooltip
+          title={
+            "Es el salario neto a entregar en este periodo de nomina aplicado los descuentos, deducciones y bonos"
+          }
+        >
+          <span>Neto del periodo</span>
+        </CustomTooltip>
+      ),
       render: (_, record) => {
-        const salary = record.SALARY - (record.AFP + record.SFS + record.ISR)
+        const withholdingValue = showWithholding
+          ? record.AFP + record.SFS + record.ISR
+          : 0
+
+        const salary =
+          record.SALARY / payrollInfo.PAYROLL_CONFIG.PERIODS +
+          record.BONUS -
+          record.DISCOUNT -
+          withholdingValue
         return (
           <span>
             {formatter({
@@ -374,31 +438,53 @@ const PayrollTable: React.FC<PayrollTableProps> = ({ payrollId }) => {
           direction={"horizontal"}
           split={<CustomDivider type={"vertical"} />}
         >
-          <CustomTooltip placement={"leftBottom"} title="Procesar Pago">
-            <CustomPopConfirm
-              title={"¿Seguro que desea pagar la nómina a este empleado?"}
-              onConfirm={() => handleProcessPartialPayroll(record)}
-            >
+          <ConditionalComponent
+            condition={allowProcess}
+            visible
+            message={"No tienes autorización para realizar esta acción."}
+            onClick={() => {
+              CustomModalConfirmation({
+                onOk: () => handleProcessPartialPayroll(record),
+                title: "Confirmación",
+                content:
+                  "¿Esta seta seguro que desea procesar el pago de nómina de este empleado?",
+              })
+            }}
+          >
+            <CustomTooltip placement={"leftBottom"} title="Procesar Pago">
               <CustomButton
-                disabled={record.STATUS}
+                disabled={!!record.STATUS}
                 size="middle"
                 type="link"
                 icon={<DollarOutlined />}
               />
-            </CustomPopConfirm>
-          </CustomTooltip>
-          <CustomTooltip
-            placement={"rightBottom"}
-            title="Remover de la nómina de este periodo"
+            </CustomTooltip>
+          </ConditionalComponent>
+          <ConditionalComponent
+            condition={allowRemove}
+            visible
+            message={"No tienes autorización para realizar esta acción."}
+            onClick={() => {
+              CustomModalConfirmation({
+                onOk: () => handleUpdateEntry(record),
+                title: "Confirmación",
+                content:
+                  "¿Esta seta seguro que desea remover a este empleado de la nómina?",
+              })
+            }}
           >
-            <CustomButton
-              size="middle"
-              danger
-              type="link"
-              icon={<DeleteOutlined />}
-              onClick={() => handleUpdateEntry(record)}
-            />
-          </CustomTooltip>
+            <CustomTooltip
+              placement={"rightBottom"}
+              title="Remover de la nómina de este periodo"
+            >
+              <CustomButton
+                size="middle"
+                danger
+                type="link"
+                icon={<DeleteOutlined />}
+              />
+            </CustomTooltip>
+          </ConditionalComponent>
         </CustomSpace>
       ),
     },
@@ -544,7 +630,7 @@ const PayrollTable: React.FC<PayrollTableProps> = ({ payrollId }) => {
     type: "checkbox",
     selectedRowKeys,
     onChange: setSelectedRowKeys,
-    getCheckboxProps: (record) => ({
+    getCheckboxProps: (record: any) => ({
       disabled: record.STATUS,
     }),
   }
@@ -558,8 +644,8 @@ const PayrollTable: React.FC<PayrollTableProps> = ({ payrollId }) => {
       <CustomCol xs={24}>
         <CustomCard style={{ marginTop: "10px" }}>
           <CustomTable
-            rowSelection={rowSelection}
-            footer={footer}
+            rowSelection={allowProcess ? rowSelection : undefined}
+            footer={allowProcess ? footer : undefined}
             title={tableTitle}
             dataSource={entries}
             columns={column}

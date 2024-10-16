@@ -1,5 +1,5 @@
 import { MenuOption, User } from "@/interfaces/user"
-import { Metadata } from "@/services/interfaces"
+import { Metadata, ReturnPayload } from "@/services/interfaces"
 import { create } from "zustand"
 
 const initialMetadata: Metadata = {
@@ -13,8 +13,11 @@ interface UserStore {
   users: User[]
   user: User
   metadata: Metadata
-  setUsers: (users: User[]) => void
-  setMetadata: (metadata: Metadata) => void
+  usernameAvailable: boolean
+  identityDocumentAvailable: boolean
+  setUsernameAvailable: (available: boolean) => void
+  setDocumentAvailable: (available: boolean) => void
+  setUsers: (payload: ReturnPayload<User[]>) => void
   setUser: (user: User) => void
 }
 
@@ -22,8 +25,12 @@ const useUserStore = create<UserStore>((set) => ({
   users: [],
   metadata: initialMetadata,
   user: <User>{},
-  setMetadata: (metadata) => set({ metadata }),
-  setUsers: (users) => set({ users }),
+  usernameAvailable: false,
+  identityDocumentAvailable: false,
+  setUsernameAvailable: (available) => set({ usernameAvailable: available }),
+  setDocumentAvailable: (available) =>
+    set({ identityDocumentAvailable: available }),
+  setUsers: ({ data, metadata }) => set({ users: data, metadata }),
   setUser: (user) => set({ user }),
 }))
 

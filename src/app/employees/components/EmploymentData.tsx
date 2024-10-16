@@ -82,7 +82,7 @@ const EmploymentData: React.FC<EmploymentDataProps> = ({ form }) => {
   const {
     mutateAsync: getSupervisor,
     data: { data: supervisors },
-  } = useGetUserLIst()
+  } = useGetUserLIst(false)
   const { mutateAsync: getDeductionList, data: deductions } =
     useGetDeductionList()
   const { mutateAsync: getDepartments, data: departments } =
@@ -226,7 +226,7 @@ const EmploymentData: React.FC<EmploymentDataProps> = ({ form }) => {
               rules={[{ required: true }]}
             >
               <CustomSelect
-                placeholder={"Seleccionar Rol"}
+                placeholder={"Seleccionar Departamento"}
                 options={departments?.map((item) => ({
                   label: item.NAME,
                   value: item.DEPARTMENT_ID,
@@ -241,7 +241,7 @@ const EmploymentData: React.FC<EmploymentDataProps> = ({ form }) => {
                 showSearch
                 placeholder={"Seleccionar supervisor"}
                 options={supervisors?.map((item) => ({
-                  label: item.NAME,
+                  label: `${item.NAME} ${item.LAST_NAME} (@${item.USERNAME})`,
                   value: item.USERNAME,
                 }))}
               />

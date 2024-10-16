@@ -75,7 +75,7 @@ const TaskListItem: React.FC<TaskListItemProps> = ({
     <CustomCol xs={24}>
       <Card>
         <CustomRow justify={"space-between"} align={"middle"} width={"100%"}>
-          <CustomCol {...defaultBreakpoints}>
+          <CustomCol xs={24} md={18} xl={16}>
             <CustomRow justify={"space-between"}>
               <CustomCol xs={1}>
                 <CustomCheckbox
@@ -103,7 +103,7 @@ const TaskListItem: React.FC<TaskListItemProps> = ({
           </CustomCol>
 
           <CustomAvatarGroup max={{ count: 3 }}>
-            {task?.ASSIGNED_USERS?.map((user, index) => (
+            {task?.ASSIGNED_USERS?.map((user) => (
               <CustomTooltip title={user.FULL_NAME} key={user.USERNAME}>
                 <CustomAvatar
                   shadow

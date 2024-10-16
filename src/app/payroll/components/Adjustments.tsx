@@ -18,7 +18,7 @@ import {
 } from "@/components/custom"
 import randomHexColorCode from "@/helpers/random-hex-color-code"
 import useDebounce from "@/hooks/useDebounce"
-import { Adjustment } from "@/interfaces/payroll"
+import { Adjustment, PayrollParameters } from "@/interfaces/payroll"
 import useGetAdjustments from "@/services/hooks/payroll/useGetAdjustments"
 import { AdvancedCondition } from "@/services/interfaces"
 import { defaultBreakpoints } from "@/styles/breakpoints"
@@ -42,6 +42,14 @@ import FilterTemplate from "@/components/FilterTemplate"
 import usePayrollStore from "@/stores/payrollStore"
 import useUpdateAdjustment from "@/services/hooks/payroll/useUpdateAdjustment"
 import { CustomModalConfirmation } from "@/components/custom/CustomModalMethods"
+import useIsAuthorized from "@/hooks/useIsAuthorized"
+import useMenuOptionStore from "@/stores/useMenuOptionStore"
+import ConditionalComponent from "@/components/ConditionalComponent"
+import { useWebSocket } from "@/context/web-socket"
+import moment from "moment"
+import { date } from "@/helpers/date-helpers"
+import useUserStore from "@/stores/userStore"
+import makePagination from "@/helpers/pagination"
 
 const optionStyles: React.CSSProperties = {
   width: "100%",
@@ -77,6 +85,9 @@ const searchOptions = [
 
 const AdjustmentTab: React.FC = () => {
   const [form] = Form.useForm()
+
+  const socket = useWebSocket()
+
   const [recordSelected, setRecordSelected] = useState<Adjustment>()
   const [modalVisibilityState, setModalVisibilityState] = useState(false)
   const [shouldUpdate, setShouldUpdate] = useState(false)
@@ -92,7 +103,13 @@ const AdjustmentTab: React.FC = () => {
   const { mutateAsync: updateAdjustment, isPending: isUpdatePending } =
     useUpdateAdjustment()
 
+  const { users } = useUserStore()
   const { payrollInfo } = usePayrollStore()
+  const { parameters } = useMenuOptionStore<PayrollParameters>()
+
+  const { OPERATION_ID_CREATE_ADJUSTMENTS } = parameters
+
+  const allowCreate = useIsAuthorized(Number(OPERATION_ID_CREATE_ADJUSTMENTS))
 
   const handleOnSearch = useCallback(
     (page = metadata?.page, size = metadata?.page_size) => {
@@ -157,6 +174,20 @@ const AdjustmentTab: React.FC = () => {
 
         setRecordSelected(undefined)
       } else {
+        if (socket) {
+          const [user] = users.filter((user) => user.USERNAME === data.USERNAME)
+          socket.send(
+            JSON.stringify({
+              receivers: [data.USERNAME],
+              message: `
+                Estimado/a @${user.NAME} ${user.LAST_NAME},
+                Te informamos que en tu nómina correspondiente al período del #${date(payrollInfo.PERIOD_START)}# al #${date(payrollInfo.PERIOD_END)}# 
+                se ha aplicado un ${data.TYPE === "B" ? "bono" : "descuento"} por concepto de #${data.DESCRIPTION}# por un monto de #${data.AMOUNT}#.
+                Si tienes alguna inquietud o deseas obtener más información, puedes comunicarte con el departamento de Recursos Humanos.
+              `,
+            })
+          )
+        }
         await createAdjustment(data)
       }
 
@@ -356,13 +387,16 @@ const AdjustmentTab: React.FC = () => {
               placeholder={"Buscar empleado..."}
             />
 
-            <CustomButton
-              type={"primary"}
-              icon={<PlusOutlined />}
+            <ConditionalComponent
+              visible
+              message={"No tienes autorización para realizar esta acción."}
+              condition={allowCreate}
               onClick={handleModalState}
             >
-              Agregar Nuevo
-            </CustomButton>
+              <CustomButton type={"primary"} icon={<PlusOutlined />}>
+                Agregar Nuevo
+              </CustomButton>
+            </ConditionalComponent>
           </CustomRow>
         </CustomCol>
       </CustomRow>
@@ -379,6 +413,10 @@ const AdjustmentTab: React.FC = () => {
               dataSource={dataSource}
               title={tableTitle}
               columns={columns}
+              pagination={makePagination(metadata)}
+              onChange={({ pageSize, current }) =>
+                handleOnSearch(current, pageSize)
+              }
             />
           </CustomCol>
         </CustomCard>

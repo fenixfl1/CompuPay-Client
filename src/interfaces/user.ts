@@ -93,6 +93,7 @@ interface User {
   UPDATED_BY?: string
   USERNAME: string
   USER_ID: number
+  DESC_DEPARTMENT?: string
 }
 
 interface Department {

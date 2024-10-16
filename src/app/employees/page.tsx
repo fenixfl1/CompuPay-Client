@@ -32,7 +32,7 @@ const page: NextPage = () => {
 
   const { visible } = useModalStore()
   const { parameters } = useMenuOptionStore<EmployeesParameters>()
-  const { setUsers, users, metadata } = useUserStore()
+  const { users, metadata } = useUserStore()
 
   const { mutateAsync: getRolesList, isPending } = useGetRolesList()
   const { mutateAsync: getUserList, isPending: isEmployeesPending } =
@@ -128,7 +128,16 @@ const page: NextPage = () => {
         )
       }
 
-      getUserList({ page, size, condition }).then(({ data }) => setUsers(data))
+      if (values.DEPARTMENTS) {
+        condition.push({
+          dataType: "list",
+          field: "department__department_id",
+          operator: "IN",
+          condition: values.DEPARTMENTS,
+        })
+      }
+
+      getUserList({ page, size, condition })
     },
     [parameters, debounce, shouldUpdate]
   )
@@ -160,7 +169,11 @@ const page: NextPage = () => {
     <CustomSpin spinning={isPending}>
       <CustomRow width={"100%"}>
         <CustomCol xs={24}>
-          <CustomCollapse defaultActiveKey={["1", "2"]} items={items} />
+          <CustomCollapse
+            expandIcon={() => null}
+            defaultActiveKey={["1", "2"]}
+            items={items}
+          />
         </CustomCol>
       </CustomRow>
     </CustomSpin>

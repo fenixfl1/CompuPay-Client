@@ -19,8 +19,6 @@ const TooltipContent = styled.div`
   padding: 10px;
 `
 
-const Text = styled(CustomText)``
-
 const PayrollByDepartment: React.FC = () => {
   const { data } = useGetSalaryByDepartments()
   return (

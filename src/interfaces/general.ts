@@ -1,5 +1,6 @@
 import { ColumnType } from "antd/lib/table"
 import { ReactNode } from "react"
+import type { w3cwebsocket as W3CWebSocket } from "websocket"
 
 export interface Formatter {
   value: string | number | undefined
@@ -34,3 +35,19 @@ export interface EditConfig {
   enterIcon?: ReactNode
   tabIndex?: number
 }
+
+export interface SocketMessage {
+  message: string
+  sender: string
+  receiver: string
+}
+
+export type WebSocketType = W3CWebSocket
+
+export type ValidateStatus =
+  | ""
+  | "error"
+  | "success"
+  | "warning"
+  | "validating"
+  | undefined

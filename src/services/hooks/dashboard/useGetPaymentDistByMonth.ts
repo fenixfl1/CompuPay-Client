@@ -9,6 +9,7 @@ interface Payload {
     ISR: number
     SALARIO: number
     SFS: number
+    period: string
   }[]
   concepts: {
     concept: string

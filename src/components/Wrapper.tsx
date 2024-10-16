@@ -1,15 +1,15 @@
 "use client"
 
-import React, { useEffect, useTransition } from "react"
+import React, { useEffect, useState, useTransition } from "react"
 import CustomLayout from "./custom/CustomLayout"
 import styled from "styled-components"
+import Darkreader from "react-darkreader-2"
 import {
   CustomAvatar,
   CustomBadge,
   CustomButton,
   CustomCol,
   CustomContent,
-  CustomDropdown,
   CustomHeader,
   CustomMenu,
   CustomRow,
@@ -18,7 +18,13 @@ import {
   CustomSpin,
   CustomText,
 } from "./custom"
-import { getSessionInfo, isLoggedIn, removeSession } from "@/lib/session"
+import {
+  getDarkMode,
+  getSessionInfo,
+  isLoggedIn,
+  removeSession,
+  setDarkMode,
+} from "@/lib/session"
 import ConditionalComponent from "./ConditionalComponent"
 import { PATH_HOME } from "@/constants/routes"
 import { useGetMenuOptions } from "@/services/hooks"
@@ -47,10 +53,7 @@ import { assert } from "@/helpers/assert"
 import EmployeeProfile from "@/app/employees/components/EmployeeProfile"
 import Fallback from "./Fallback"
 import Link from "next/link"
-import { MenuProps } from "antd"
-import { w3cwebsocket as W3CWebSocket } from "websocket"
-import { customNotification } from "./custom/customNotification"
-import jsonParse from "@/helpers/jsonParse"
+import Notifications from "./Notifications"
 
 const LogoContainer = styled.div`
   height: 75px;
@@ -149,11 +152,12 @@ interface WrapperProps {
 
 const Wrapper: React.FC<WrapperProps> = (props) => {
   const router = useRouter()
-  // const socket = useSocket()
-  const client = new W3CWebSocket("ws://localhost:8000/ws/notifications")
-  const [isPending, startTransition] = useTransition()
+  const [isPending] = useTransition()
   const { setOpenDrawer, open } = useDrawerStore()
   const { setVisible } = useModalStore()
+
+  const [isDarkMode, setIsDarkMode] = useState(getDarkMode())
+
   const { parameters, menuOptions, setSelectedMenuOption, setParameters } =
     useMenuOptionStore()
 
@@ -170,14 +174,12 @@ const Wrapper: React.FC<WrapperProps> = (props) => {
   const canCreate = useIsAuthorized(Number(operationCreate))
 
   useEffect(() => {
-    client.onopen = () => {
-      client.send(JSON.stringify({ message: "Ahora estoy conectado." }))
-    }
+    typeof isDarkMode === "boolean" && setDarkMode(isDarkMode)
+  }, [isDarkMode])
 
-    client.onmessage = ({ data }) => {
-      const info = jsonParse<Record<string, string>>(data as unknown as string)
-    }
-  }, [client])
+  useEffect(() => {
+    setIsDarkMode(getDarkMode())
+  }, [])
 
   useEffect(() => {
     setSelectedMenuOption(getSelectedOption())
@@ -215,63 +217,6 @@ const Wrapper: React.FC<WrapperProps> = (props) => {
       </ConditionalComponent>
     ),
   }))
-
-  const notifyItems: MenuProps["items"] = [
-    {
-      label: (
-        <CustomRow justify={"space-between"}>
-          <div
-            style={{
-              width: "max-content",
-              display: "flex",
-              flexDirection: "column",
-            }}
-          >
-            <CustomText strong>Task</CustomText>{" "}
-            <CustomText type={"secondary"}>Notification Message 1</CustomText>
-          </div>
-          <CustomBadge dot />
-        </CustomRow>
-      ),
-      key: "1",
-    },
-    {
-      label: (
-        <CustomRow justify={"space-between"}>
-          <div
-            style={{
-              width: "max-content",
-              display: "flex",
-              flexDirection: "column",
-            }}
-          >
-            <CustomText strong>Users</CustomText>{" "}
-            <CustomText type={"secondary"}>Notification Message 2</CustomText>
-          </div>
-          <CustomBadge dot />
-        </CustomRow>
-      ),
-      key: "2",
-    },
-    {
-      label: (
-        <CustomRow justify={"space-between"}>
-          <div
-            style={{
-              width: "max-content",
-              display: "flex",
-              flexDirection: "column",
-            }}
-          >
-            <CustomText strong>Payroll</CustomText>{" "}
-            <CustomText type={"secondary"}>Notification Message 3</CustomText>
-          </div>
-          <CustomBadge dot />
-        </CustomRow>
-      ),
-      key: "3",
-    },
-  ]
 
   return (
     <ConditionalComponent
@@ -363,44 +308,27 @@ const Wrapper: React.FC<WrapperProps> = (props) => {
                       onClick={() => setVisible(true)}
                     />
                   </ConditionalComponent>
-                  <CustomButton
-                    size={"large"}
-                    icon={<SearchOutlined />}
-                    shape={"circle"}
+                  <Darkreader
+                    defaultDarken={isDarkMode}
+                    onChange={setIsDarkMode}
                   />
-                  <CustomDropdown
-                    destroyPopupOnHide
-                    menu={{
-                      items: notifyItems,
-                      className: "notification-dropdown",
-                    }}
-                    dropdownRender={(node) => (
-                      <div style={{ width: "400px" }}>{node}</div>
-                    )}
-                  >
-                    <CustomBadge count={5}>
-                      <CustomButton
-                        size={"large"}
-                        icon={<BellOutlined />}
-                        shape={"circle"}
-                      />
-                    </CustomBadge>
-                  </CustomDropdown>
+                  <Notifications>
+                    <CustomButton
+                      size={"large"}
+                      icon={<BellOutlined />}
+                      shape={"circle"}
+                    />
+                  </Notifications>
                 </CustomRow>
               </HeaderContainer>
             </CustomHeader>
             <Content>
               <CustomContentContainer>
-                <ConditionalComponent
-                  condition={!isPending}
-                  fallback={<Fallback />}
-                >
-                  <MotionComponent key={isPending ? 1 : 0}>
-                    <CustomSpin spinning={isUserPending}>
-                      {props.children}
-                    </CustomSpin>
-                  </MotionComponent>
-                </ConditionalComponent>
+                <MotionComponent key={isPending ? 1 : 0}>
+                  <CustomSpin spinning={isUserPending}>
+                    {props.children}
+                  </CustomSpin>
+                </MotionComponent>
               </CustomContentContainer>
             </Content>
           </ContentLayout>

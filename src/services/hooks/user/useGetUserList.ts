@@ -7,6 +7,7 @@ import useUserStore from "@/stores/userStore"
 
 const initialData: ReturnPayload<User[]> = {
   data: [],
+  message: "",
   metadata: {
     page: 1,
     page_size: 10,
@@ -16,25 +17,20 @@ const initialData: ReturnPayload<User[]> = {
   },
 }
 
-export function useGetUserLIst() {
-  const { setUsers, setMetadata } = useUserStore()
+export function useGetUserLIst(storeResponse = true) {
+  const { setUsers } = useUserStore()
 
   return useCustomMutation<ReturnPayload<User[]>, GetPayload<User>>({
     initialData,
     mutationKey: ["users", "get-user-list"],
-    onSuccess: ({ data, metadata }) => {
-      setUsers(data)
-      setMetadata(metadata)
-    },
+    onSuccess: storeResponse ? setUsers : undefined,
     mutationFn: async ({ condition, page, size, fields }) => {
-      const {
-        data: { data, metadata, message },
-      } = await postRequest<User[]>(
+      const { data } = await postRequest<User[]>(
         `${WEB_API_GET_USER_LIST}?page=${page}&page_size=${size}`,
         { condition, fields }
       )
 
-      return { data, metadata, message }
+      return data
     },
   })
 }

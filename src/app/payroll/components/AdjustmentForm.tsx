@@ -17,8 +17,10 @@ import errorHandler from "@/helpers/errorHandler"
 import useDebounce from "@/hooks/useDebounce"
 import useResetFormOnCloseModal from "@/hooks/useResetFormOnCloseModal"
 import { Adjustment } from "@/interfaces/payroll"
+import { User } from "@/interfaces/user"
 import useCreateAdjustment from "@/services/hooks/payroll/useCreateAjustment"
 import { useGetUserLIst } from "@/services/hooks/user/useGetUserList"
+import { AdvancedCondition } from "@/services/interfaces"
 import {
   defaultBreakpoints,
   formItemLayout,
@@ -61,30 +63,37 @@ const AdjustmentForm: React.FC<AdjustmentFormProps> = ({
   }, [record])
 
   const handleSearchEmployees = useCallback(() => {
+    const condition: AdvancedCondition<User>[] = [
+      {
+        condition: "A",
+        dataType: "str",
+        field: "STATE",
+        operator: "=",
+      },
+      {
+        condition: true,
+        dataType: "bool",
+        field: "IS_STAFF",
+        operator: "=",
+      },
+      {
+        condition: debounce,
+        dataType: "str",
+        field: ["NAME", "LAST_NAME", "USERNAME"],
+        operator: "ILIKE",
+      },
+      {
+        condition: 0,
+        dataType: "int",
+        field: "SALARY",
+        operator: ">",
+      },
+    ]
     getUserList({
+      condition,
       page: 1,
       size: 10,
       fields: ["NAME", "LAST_NAME", "USERNAME"],
-      condition: [
-        {
-          condition: "A",
-          dataType: "str",
-          field: "STATE",
-          operator: "=",
-        },
-        {
-          condition: true,
-          dataType: "bool",
-          field: "IS_STAFF",
-          operator: "=",
-        },
-        {
-          condition: debounce,
-          dataType: "str",
-          field: ["NAME", "LAST_NAME", "USERNAME"],
-          operator: "ILIKE",
-        },
-      ],
     })
   }, [debounce])
 

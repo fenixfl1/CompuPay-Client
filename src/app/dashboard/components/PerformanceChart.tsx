@@ -62,7 +62,7 @@ const PerformanceChart: React.FC = () => {
         </CustomForm>
       </CustomRow>
       <BarChart
-        width={455}
+        width={600}
         height={455}
         data={performance}
         margin={{

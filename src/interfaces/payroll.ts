@@ -1,3 +1,10 @@
+export interface PayrollParameters {
+  OPERATION_ID_CREATE_ADJUSTMENTS: string
+  OPERATION_ID_PROCESS_PAYROLL: string
+  ID_OPERACION_CREAR_NOMINA: string
+  OPERATION_ID_REMOVE_PAYROLL_ENTRY: string
+}
+
 export interface Payroll {
   PAYROLL_ID?: number
   PAYROLL_PERIOD?: string
@@ -27,7 +34,7 @@ export interface PayrollEntry {
   SALARY: number
   SFS: number
   STATE: string
-  STATUS: boolean
+  STATUS: string
   UPDATED_AT: string
   UPDATED_BY: string
   USER: string
@@ -81,9 +88,13 @@ export interface PayrollInfo {
   NEXT_PAYMENT: string
   CURRENT_PERIOD: number
   PAYROLL_CONFIG: PayrollConfig
+  PERIOD_START: string
+  PERIOD_END: string
 }
 
 export interface PayrollHistory extends Payroll {
+  CALC_DEDUCTIONS: boolean
+  STATUS: string
   ENTRIES: PayrollEntry &
     {
       PAYMENT_DETAILS: PaymentDetail

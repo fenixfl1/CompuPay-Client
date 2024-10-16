@@ -4,7 +4,7 @@ import { Adjustment } from "@/interfaces/payroll"
 import { postRequest } from "@/services/api"
 import { ReturnPayload, GetPayload } from "@/services/interfaces"
 
-const initialData: ReturnPayload<Adjustment[]> = {
+const initialData: Omit<ReturnPayload<Adjustment[]>, "message"> = {
   data: [],
   metadata: {
     page: 1,
@@ -16,7 +16,10 @@ const initialData: ReturnPayload<Adjustment[]> = {
 }
 
 function useGetAdjustments() {
-  return useCustomMutation<ReturnPayload<Adjustment[]>, GetPayload>({
+  return useCustomMutation<
+    Omit<ReturnPayload<Adjustment[]>, "message">,
+    GetPayload
+  >({
     initialData,
     mutationKey: ["payroll", "get-adjustments"],
     mutationFn: async ({ condition, page, size }) => {

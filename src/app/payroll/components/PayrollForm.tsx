@@ -45,32 +45,33 @@ const PayrollForm: React.FC<PayrollFormProps> = ({ onFinish }) => {
     useGetUserLIst()
 
   const dateRange = useMemo(() => {
-    let minDate = dayjs()
+    let minDate = dayjs().startOf("month") // Por defecto, el primer día del mes actual
     let maxDate = dayjs()
 
     if (payrollInfo.PAYROLL_CONFIG && payrollInfo.CURRENT_PERIOD) {
       const daysInMonth = dayjs().daysInMonth()
       const periods = payrollInfo.PAYROLL_CONFIG.PERIODS
       const daysPerPeriod = Math.floor(daysInMonth / periods)
-      const currentPeriod = payrollInfo.CURRENT_PERIOD
-      let nextPeriod = currentPeriod + 1
+      let currentPeriod = 0
 
-      if (nextPeriod > periods) {
-        nextPeriod = 1
+      const startOfMonth = dayjs().startOf("month")
 
-        const startOfNextMonth = dayjs().add(1, "month").startOf("month")
-        minDate = startOfNextMonth
-        maxDate = minDate.add(daysPerPeriod - 1, "day")
-      } else {
-        const startOfMonth = dayjs().startOf("month")
+      if (dayjs(payrollInfo.PERIOD_END).month() === dayjs().month()) {
+        currentPeriod = payrollInfo.CURRENT_PERIOD
+      }
 
-        minDate = startOfMonth.add(currentPeriod * daysPerPeriod, "day")
-
-        if (currentPeriod === periods) {
-          minDate = dayjs().add(1, "month").startOf("month")
+      if (currentPeriod <= periods) {
+        if (currentPeriod === 0) {
+          minDate = startOfMonth
+        } else {
+          minDate = startOfMonth.add(currentPeriod * daysPerPeriod, "day")
         }
 
-        maxDate = minDate.add(daysPerPeriod - 1, "day")
+        if (currentPeriod === periods) {
+          maxDate = dayjs().endOf("month")
+        } else {
+          maxDate = minDate.add(daysPerPeriod, "day")
+        }
       }
     }
 
