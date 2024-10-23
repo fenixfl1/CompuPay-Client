@@ -35,6 +35,7 @@ import useGetRolesList from "@/services/hooks/user/useGetRolesList"
 import { useGetUserLIst } from "@/services/hooks/user/useGetUserList"
 import useUpdateUser from "@/services/hooks/user/useUpdateUser"
 import { AdvancedCondition } from "@/services/interfaces"
+import useMenuOptionStore from "@/stores/useMenuOptionStore"
 import useUserStore from "@/stores/userStore"
 import {
   formItemLayout,
@@ -87,6 +88,10 @@ const EmploymentData: React.FC<EmploymentDataProps> = ({ form }) => {
     useGetDeductionList()
   const { mutateAsync: getDepartments, data: departments } =
     useGetDepartmentList()
+
+  const { parameters } = useMenuOptionStore<{ SHOW_DEDUCTION_TIPS: string }>()
+
+  const { SHOW_DEDUCTION_TIPS } = parameters ?? { SHOW_DEDUCTION_TIPS: "0" }
 
   const handleSearchSupervisor = useCallback(() => {
     const condition: AdvancedCondition[] = [
@@ -275,36 +280,38 @@ const EmploymentData: React.FC<EmploymentDataProps> = ({ form }) => {
               />
             </CustomFormItem>
           </CustomCol>
-          <CustomCol xs={24}>
-            <CustomFormItem label={" "} colon={false} {...labelColFullWidth}>
-              <CustomAlert
-                icon={<BulbOutlined />}
-                type={"info"}
-                message={
-                  <CustomParagraph>
-                    Antes de seleccionar el impuesto sobre la renta (ISR), le
-                    recomendamos visitar la página de la DGI. Allí encontrará
-                    todas las herramientas necesarias para determinar en qué
-                    rango de retención se encuentra su empleado, según su
-                    salario. Para obtener más información, visite el siguiente
-                    enlace: <br />
-                    <Link
-                      passHref
-                      legacyBehavior
-                      href={
-                        "https://www.toptrabajos.com/blog/do/descuentos-de-nomina-sfs-afp-isr/#:~:text=Siguiendo%20el%20ejemplo%20si%20tu%20salario%20es%20de,que%20se%20te%20har%C3%A1%20en%20concepto%20de%20AFP."
-                      }
-                    >
-                      <a target={"_blank"}>
-                        Descuentos de nómina en República Dominicana: SFS, AFP e
-                        ISR
-                      </a>
-                    </Link>
-                  </CustomParagraph>
-                }
-              />
-            </CustomFormItem>
-          </CustomCol>
+          <ConditionalComponent condition={SHOW_DEDUCTION_TIPS === "1"}>
+            <CustomCol xs={24}>
+              <CustomFormItem label={" "} colon={false} {...labelColFullWidth}>
+                <CustomAlert
+                  icon={<BulbOutlined />}
+                  type={"info"}
+                  message={
+                    <CustomParagraph>
+                      Antes de seleccionar el impuesto sobre la renta (ISR), le
+                      recomendamos visitar la página de la DGI. Allí encontrará
+                      todas las herramientas necesarias para determinar en qué
+                      rango de retención se encuentra su empleado, según su
+                      salario. Para obtener más información, visite el siguiente
+                      enlace: <br />
+                      <Link
+                        passHref
+                        legacyBehavior
+                        href={
+                          "https://www.toptrabajos.com/blog/do/descuentos-de-nomina-sfs-afp-isr/#:~:text=Siguiendo%20el%20ejemplo%20si%20tu%20salario%20es%20de,que%20se%20te%20har%C3%A1%20en%20concepto%20de%20AFP."
+                        }
+                      >
+                        <a target={"_blank"}>
+                          Descuentos de nómina en República Dominicana: SFS, AFP
+                          e ISR
+                        </a>
+                      </Link>
+                    </CustomParagraph>
+                  }
+                />
+              </CustomFormItem>
+            </CustomCol>
+          </ConditionalComponent>
           <CustomDivider>
             <CustomText>Documentos</CustomText>
           </CustomDivider>
