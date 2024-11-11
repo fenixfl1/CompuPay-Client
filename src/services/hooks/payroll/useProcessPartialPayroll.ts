@@ -6,7 +6,11 @@ import { Condition } from "@/services/interfaces"
 function useProcessPartialPayroll() {
   return useCustomMutation<
     string,
-    Condition<{ USERS: string[]; PAYROLL_ID: number }>
+    Condition<{
+      USERS: string[]
+      PAYROLL_ID: number
+      INCLUDES_OVERTIME: boolean
+    }>
   >({
     initialData: "",
     mutationKey: ["payroll", "process-partial-payroll"],

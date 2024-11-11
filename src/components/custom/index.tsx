@@ -58,6 +58,7 @@ import CustomPopConfirm from "./CustomPopConfirm"
 import CustomTimeline from "./CustomTimeline"
 import CustomSegmented from "./CustomSegmented"
 import CustomDropdown from "./CustomDropdown"
+import CustomResult from "./CustomResult"
 
 export {
   CustomAlert,
@@ -122,4 +123,5 @@ export {
   CustomTooltip,
   CustomUpload,
   CustomWatermark,
+  CustomResult,
 }

@@ -19,6 +19,12 @@ import useGetRolesList from "@/services/hooks/user/useGetRolesList"
 import { getSessionInfo } from "@/lib/session"
 import { AdvancedCondition } from "@/services/interfaces"
 import useUserStore from "@/stores/userStore"
+import errorHandler from "@/helpers/errorHandler"
+import useGenerateReport from "@/services/hooks/reports/useGenerateReport"
+import { WEB_API_GET_USER_REPORT } from "@/constants/routes"
+import PDFRender from "@/components/PDFRender"
+import ConditionalComponent from "@/components/ConditionalComponent"
+import { openReport } from "@/helpers/open-report"
 
 const EmployeesTable = React.lazy(
   () => import("@/app/employees/components/EmployeesTable")
@@ -26,6 +32,7 @@ const EmployeesTable = React.lazy(
 
 const page: NextPage = () => {
   const [form] = Form.useForm()
+  const [condition, setCondition] = useState<AdvancedCondition[]>([])
   const [shouldUpdate, setShouldUpdate] = useState<boolean>()
   const [searchValue, setSearchValue] = useState("")
   const debounce = useDebounce(searchValue)
@@ -34,9 +41,13 @@ const page: NextPage = () => {
   const { parameters } = useMenuOptionStore<EmployeesParameters>()
   const { users, metadata } = useUserStore()
 
+  const { mutateAsync: generateReport, isPending: isGenerateReportPending } =
+    useGenerateReport(WEB_API_GET_USER_REPORT)
   const { mutateAsync: getRolesList, isPending } = useGetRolesList()
   const { mutateAsync: getUserList, isPending: isEmployeesPending } =
     useGetUserLIst()
+
+  const { USER_REPORT_COLUMNS_WIDTH, USER_REPORT_COLUMNS } = parameters
 
   useEffect(() => {
     getRolesList({
@@ -55,7 +66,6 @@ const page: NextPage = () => {
 
   const handleGetEmployees = useCallback(
     (page = metadata?.page, size = metadata?.page_size) => {
-      if (!parameters?.ID_ROLES_EMPLEADOS) return
       const values = form.getFieldsValue()
       const condition: AdvancedCondition[] = [
         {
@@ -137,12 +147,34 @@ const page: NextPage = () => {
         })
       }
 
+      setCondition(condition)
+
       getUserList({ page, size, condition })
     },
     [parameters, debounce, shouldUpdate]
   )
 
   useEffect(handleGetEmployees, [handleGetEmployees])
+
+  const handleGenerateReport = async () => {
+    try {
+      const column_widths = USER_REPORT_COLUMNS_WIDTH.split(",").map((key) =>
+        Number(key)
+      )
+
+      const fields = USER_REPORT_COLUMNS.split(",")
+
+      const response = await generateReport({
+        condition,
+        column_widths,
+        fields,
+      })
+
+      openReport(response)
+    } catch (error) {
+      errorHandler(error)
+    }
+  }
 
   const items: CollapseProps["items"] = [
     {
@@ -152,6 +184,7 @@ const page: NextPage = () => {
       children: (
         <EmployeesTable
           form={form}
+          onPrint={handleGenerateReport}
           onSearch={setSearchValue}
           onFilter={() => setShouldUpdate(!shouldUpdate)}
           metadata={metadata}
@@ -166,17 +199,19 @@ const page: NextPage = () => {
   ]
 
   return (
-    <CustomSpin spinning={isPending}>
-      <CustomRow width={"100%"}>
-        <CustomCol xs={24}>
-          <CustomCollapse
-            expandIcon={() => null}
-            defaultActiveKey={["1", "2"]}
-            items={items}
-          />
-        </CustomCol>
-      </CustomRow>
-    </CustomSpin>
+    <>
+      <CustomSpin spinning={isPending || isGenerateReportPending}>
+        <CustomRow width={"100%"}>
+          <CustomCol xs={24}>
+            <CustomCollapse
+              expandIcon={() => null}
+              defaultActiveKey={["1", "2"]}
+              items={items}
+            />
+          </CustomCol>
+        </CustomRow>
+      </CustomSpin>
+    </>
   )
 }
 

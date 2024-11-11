@@ -18,12 +18,19 @@ import PayrollForm from "./components/PayrollForm"
 import useGetPayrollInfo from "@/services/hooks/payroll/useGetPayrollInfo"
 import usePayrollStore from "@/stores/payrollStore"
 import PayrollHistoryTable from "./components/PayrollHistoryTable"
+import useUserStore from "@/stores/userStore"
+import { initialData } from "@/services/hooks/user/useGetUserList"
 
 const page: NextPage = () => {
   const { payrollInfo } = usePayrollStore()
   const { isPending: isGetInfoPending, refetch } = useGetPayrollInfo()
+  const { setUsers } = useUserStore()
 
-  useEffect(() => {}, [])
+  useEffect(() => {
+    return () => {
+      setUsers(initialData)
+    }
+  }, [])
 
   const items: Tab[] = [
     {

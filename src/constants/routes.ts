@@ -47,6 +47,15 @@ export const WEB_API_GET_PAYMENT_DIST_BY_MONTH =
   "dashboard/get_payroll_payment_detail/"
 export const WEB_API_GET_NOTIFICATIONS = "notifications/get_notifications"
 export const WEB_API_MARK_NOTIFICATIONS_AS_READ = "notifications/mark_as_read"
+export const WEB_API_CREATE_LEAVE = "time_management/create_leave/"
+export const WEB_API_UPDATE_LEAVE = "time_management/update_leave/"
+export const WEB_API_GET_LEAVE_LIST = "time_management/get_leaves/"
+export const WEB_API_GET_LEAVE = "time_management/get_leave/"
+export const WEB_API_CREATE_OVERTIME = "time_management/create_overtime/"
+export const WEB_API_UPDATE_OVERTIME = "time_management/update_overtime/"
+export const WEB_API_GET_OVERTIME_LIST = "time_management/get_overtimes/"
+export const WEB_API_GET_OVERTIME = "time_management/get_overtime/"
+export const WEB_API_GET_USER_REPORT = "users/generate_report/"
 
 // internal routes
 export const PATH_LOGIN = "/login"

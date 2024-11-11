@@ -5,7 +5,7 @@ import { postRequest } from "@/services/api"
 import { ReturnPayload, GetPayload } from "@/services/interfaces"
 import useUserStore from "@/stores/userStore"
 
-const initialData: ReturnPayload<User[]> = {
+export const initialData: ReturnPayload<User[]> = {
   data: [],
   message: "",
   metadata: {

@@ -2,14 +2,12 @@ import { NextRequest, NextResponse } from "next/server"
 import { cookies } from "next/headers"
 import { COOKIE_KEY_USER_DATA } from "@/constants/cookieKeys"
 import {
-  PATH_DASHBOARD,
   PATH_HOME,
   PATH_LOGIN,
   protectedRoutes,
   publicRoutes,
 } from "@/constants/routes"
 import { SessionPayload } from "./interfaces/user"
-import { assert } from "./helpers/assert"
 import jsonParse from "./helpers/jsonParse"
 
 export function middleware(request: NextRequest) {

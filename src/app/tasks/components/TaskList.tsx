@@ -25,7 +25,7 @@ import { Task } from "@/interfaces/task"
 import useGetTaskList from "@/services/hooks/tasks/useGetTaskList"
 import useModalStore from "@/stores/modalStore"
 import useTaskStore from "@/stores/taskStore"
-import { FilterOutlined } from "@ant-design/icons"
+import { FilterOutlined, PrinterOutlined } from "@ant-design/icons"
 import { Form } from "antd"
 import React, { useCallback, useEffect, useState } from "react"
 import styled from "styled-components"
@@ -179,7 +179,7 @@ const TaskList: React.FC = () => {
       if (socket) {
         socket.send(
           JSON.stringify({
-            message: `La tarea #NO.${task.TASK_ID} - ${task.NAME}# ha sido marcada como ${task.COMPLETED ? "completada" : "No completada"} por @${getSessionInfo().USERNAME} `,
+            message: `La tarea #NO.${task.TASK_ID} - ${task.NAME}# ha sido marcada como ${task.COMPLETED ? "No completada" : "completada"} por @${getSessionInfo().USERNAME} `,
             receivers: Array.from(
               new Set(
                 receivers.filter((item) => item !== getSessionInfo().USERNAME)
@@ -244,29 +244,29 @@ const TaskList: React.FC = () => {
               <CustomRow justify={"space-between"} gap={15}>
                 <CustomCol xs={24} sm={12}>
                   <CustomSpace direction="horizontal" size={10}>
-                    <CustomFormItem>
-                      <CustomTooltip title={"Filtros"} placement={"left"}>
-                        <CustomPopover
-                          content={popoverContent}
-                          title={
-                            <CustomDivider>
-                              <CustomText strong>Filtros</CustomText>
-                            </CustomDivider>
-                          }
-                        >
-                          <CustomButton
-                            size={"large"}
-                            type={"text"}
-                            icon={<FilterOutlined />}
-                          />
-                        </CustomPopover>
-                      </CustomTooltip>
-                    </CustomFormItem>
-                    <ConditionalComponent condition={false}>
-                      <CustomFormItem label={"Ordenar Por"}>
-                        <CustomSelect />
-                      </CustomFormItem>
-                    </ConditionalComponent>
+                    <CustomTooltip title={"Filtros"} placement={"left"}>
+                      <CustomPopover
+                        content={popoverContent}
+                        title={
+                          <CustomDivider>
+                            <CustomText strong>Filtros</CustomText>
+                          </CustomDivider>
+                        }
+                      >
+                        <CustomButton
+                          size={"large"}
+                          type={"text"}
+                          icon={<FilterOutlined />}
+                        />
+                      </CustomPopover>
+                    </CustomTooltip>
+                    <CustomTooltip title={"Generar Reporte"}>
+                      <CustomButton
+                        size={"large"}
+                        icon={<PrinterOutlined />}
+                        type={"text"}
+                      />
+                    </CustomTooltip>
                   </CustomSpace>
                 </CustomCol>
                 <CustomCol xs={24} lg={12} xl={8}>

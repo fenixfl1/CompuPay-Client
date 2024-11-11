@@ -1,3 +1,4 @@
+import React, { useCallback, useEffect, useMemo } from "react"
 import ConditionalComponent from "@/components/ConditionalComponent"
 import {
   CustomCheckboxGroup,
@@ -16,7 +17,6 @@ import { customNotification } from "@/components/custom/customNotification"
 import { assert } from "@/helpers/assert"
 import errorHandler from "@/helpers/errorHandler"
 import useCreatePayroll from "@/services/hooks/payroll/useCreatePayroll"
-import useGetPayrollInfo from "@/services/hooks/payroll/useGetPayrollInfo"
 import { useGetUserLIst } from "@/services/hooks/user/useGetUserList"
 import { AdvancedCondition } from "@/services/interfaces"
 import useModalStore from "@/stores/modalStore"
@@ -25,7 +25,6 @@ import useUserStore from "@/stores/userStore"
 import { formItemLayout, labelColFullWidth } from "@/styles/breakpoints"
 import { Form } from "antd"
 import dayjs, { Dayjs } from "dayjs"
-import React, { useCallback, useEffect, useMemo } from "react"
 
 interface PayrollFormProps {
   onFinish?: () => void
@@ -125,11 +124,15 @@ const PayrollForm: React.FC<PayrollFormProps> = ({ onFinish }) => {
     assert<Dayjs[]>(FECHAS)
 
     try {
+      data.EMPLOYEES = data.EMPLOYEES ?? data.EMPLOYEE_SELECTION
+
+      delete data.EMPLOYEE_SELECTION
+
       const message = await createPayroll({
-        EMPLOYEES: data.EMPLOYEES ?? data.EMPLOYEE_SELECTION,
         PERIOD_END: FECHAS[1]?.format("YYYY-MM-DD"),
         PERIOD_START: FECHAS[0]?.format("YYYY-MM-DD"),
         STATE: "A",
+        ...data,
       })
 
       customNotification({
@@ -164,11 +167,59 @@ const PayrollForm: React.FC<PayrollFormProps> = ({ onFinish }) => {
                 {...labelColFullWidth}
               >
                 <CustomRangePicker
-                  minDate={dateRange.minDate}
-                  maxDate={dateRange.maxDate}
+                // minDate={dateRange.minDate}
+                // maxDate={dateRange.maxDate}
                 />
               </CustomFormItem>
             </CustomCol>
+
+            <CustomDivider>
+              <CustomText strong>¿Pagar las horas extras?</CustomText>
+            </CustomDivider>
+            <CustomCol xs={24}>
+              <CustomFormItem
+                label={" "}
+                colon={false}
+                name={"INCLUDES_OVERTIME"}
+                labelCol={{ span: 4 }}
+                rules={[{ required: true }]}
+                help={
+                  "Indica si al procesar la nomina debe calcular y pagar las horas extras"
+                }
+              >
+                <CustomRadioGroup
+                  options={[
+                    { label: "Sí", value: true },
+                    { label: "No", value: false },
+                  ]}
+                />
+              </CustomFormItem>
+            </CustomCol>
+            <CustomDivider>
+              <CustomText strong>
+                ¿Procesar vacaciones, ausencias y permisos?
+              </CustomText>
+            </CustomDivider>
+            <CustomCol xs={24}>
+              <CustomFormItem
+                label={" "}
+                colon={false}
+                name={"INCLUDES_LEAVES"}
+                labelCol={{ span: 4 }}
+                rules={[{ required: true }]}
+                help={
+                  "Indica si aḷ procesar la nómina debe calcular y procesar las ausencias, vacaciones y permisos"
+                }
+              >
+                <CustomRadioGroup
+                  options={[
+                    { label: "Sí", value: true },
+                    { label: "No", value: false },
+                  ]}
+                />
+              </CustomFormItem>
+            </CustomCol>
+
             <CustomDivider>
               <CustomText strong>Seleccionar empleados</CustomText>
             </CustomDivider>

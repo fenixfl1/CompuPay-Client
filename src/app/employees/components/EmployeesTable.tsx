@@ -21,7 +21,12 @@ import {
 } from "@/components/custom"
 import formatter from "@/helpers/formatter"
 import { Roles, User } from "@/interfaces/user"
-import { DownOutlined, EditOutlined, FilterOutlined } from "@ant-design/icons"
+import {
+  DownOutlined,
+  EditOutlined,
+  FilterOutlined,
+  PrinterOutlined,
+} from "@ant-design/icons"
 import { ColumnType, TablePaginationConfig } from "antd/lib/table"
 import React, { useContext, useEffect, useRef, useState } from "react"
 import styled from "styled-components"
@@ -190,6 +195,7 @@ interface EmployeeTableProps {
   onChange?: (pagination: TablePaginationConfig) => void
   onSearch: (value: string) => void
   onFilter?: () => void
+  onPrint?: () => void
   form: FormInstance
   showFilter?: boolean
 }
@@ -201,6 +207,7 @@ const EmployeesTable: React.FC<EmployeeTableProps> = ({
   onChange,
   onSearch,
   onFilter,
+  onPrint,
   showFilter = true,
   form,
 }) => {
@@ -330,6 +337,7 @@ const EmployeesTable: React.FC<EmployeeTableProps> = ({
             layout="vertical"
             label={<CustomText strong>Departamentos</CustomText>}
             name={"DEPARTMENTS"}
+            labelCol={{ span: 24 }}
           >
             <CustomSelect
               mode={"multiple"}
@@ -536,23 +544,36 @@ const EmployeesTable: React.FC<EmployeeTableProps> = ({
       <CustomCol xs={24}>
         <CustomForm form={form} component={false}>
           <CustomRow justify={"space-between"} gap={15}>
-            <ConditionalComponent condition={showFilter}>
-              <CustomTooltip title={"Filtros"} placement={"left"}>
-                <CustomPopover
-                  title={"Filtros"}
-                  content={popoverContent}
-                  trigger={"click"}
-                >
-                  <CustomBadge count={filterCount}>
-                    <CustomButton
-                      size={"large"}
-                      type={"text"}
-                      icon={<FilterOutlined />}
-                    />
-                  </CustomBadge>
-                </CustomPopover>
-              </CustomTooltip>
-            </ConditionalComponent>
+            <CustomCol xs={4} sm={6} lg={12} xl={8}>
+              <CustomRow justify={"start"} gap={20}>
+                <ConditionalComponent condition={showFilter}>
+                  <CustomTooltip title={"Filtros"} placement={"left"}>
+                    <CustomPopover
+                      title={"Filtros"}
+                      content={popoverContent}
+                      trigger={"click"}
+                    >
+                      <CustomBadge count={filterCount}>
+                        <CustomButton
+                          size={"large"}
+                          type={"text"}
+                          icon={<FilterOutlined />}
+                        />
+                      </CustomBadge>
+                    </CustomPopover>
+                  </CustomTooltip>
+                </ConditionalComponent>
+
+                <CustomTooltip title={"Generar Reporte"}>
+                  <CustomButton
+                    size={"large"}
+                    icon={<PrinterOutlined />}
+                    type={"text"}
+                    onClick={onPrint}
+                  />
+                </CustomTooltip>
+              </CustomRow>
+            </CustomCol>
             <CustomCol xs={24} sm={18} md={16} lg={12} xl={8}>
               <CustomFormItem noStyle name={"SEARCH"}>
                 <CustomSearch

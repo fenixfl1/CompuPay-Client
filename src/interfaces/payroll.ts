@@ -38,6 +38,9 @@ export interface PayrollEntry {
   UPDATED_AT: string
   UPDATED_BY: string
   USER: string
+  OVERTIMES: number
+  VACATIONS: number
+  OTHER_DISCOUNT: number
 }
 
 export interface Adjustment {
@@ -90,6 +93,8 @@ export interface PayrollInfo {
   PAYROLL_CONFIG: PayrollConfig
   PERIOD_START: string
   PERIOD_END: string
+  INCLUDES_OVERTIME: boolean
+  INCLUDES_LEAVES: boolean
 }
 
 export interface PayrollHistory extends Payroll {

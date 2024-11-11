@@ -6,6 +6,7 @@ import { GetPayload, ReturnPayload } from "@/services/interfaces"
 
 const initialData: ReturnPayload<PayrollHistory[]> = {
   data: [],
+  message: "",
   metadata: {
     page: 1,
     page_size: 10,
@@ -20,14 +21,12 @@ function useGetPayrollHistory() {
     initialData,
     mutationKey: ["payroll", "get-payroll-history"],
     mutationFn: async ({ condition, page, size }) => {
-      const {
-        data: { data, metadata },
-      } = await postRequest<PayrollHistory[]>(
+      const { data } = await postRequest<PayrollHistory[]>(
         `${WEB_API_GET_PAYROLL_HISTORY}?page=${page}&page_size=${size}`,
         { condition }
       )
 
-      return { data, metadata }
+      return data
     },
   })
 }

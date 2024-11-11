@@ -5,15 +5,19 @@ interface MenuOptionState<T = any> {
   menuOptions: MenuOption<T>[]
   selectedMenuOption: MenuOption<T>
   parameters: T
+  selectedItem: string[]
   setParameters: (parameters: T) => void
   setMenuOptions: (menuOptions: MenuOption<T>[]) => void
   setSelectedMenuOption: (selectedMenuOption: MenuOption<T>) => void
+  setSelectedKey: (keys: string[]) => void
 }
 
 const menuOptionStore = create<MenuOptionState>((set) => ({
   menuOptions: [],
   selectedMenuOption: <MenuOption>{},
   parameters: <any>{},
+  selectedItem: [],
+  setSelectedKey: (selectedItem) => set({ selectedItem }),
   setMenuOptions: (menuOptions) => set({ menuOptions }),
   setParameters: (parameters) => {
     sessionStorage.setItem("parameters", JSON.stringify(parameters))

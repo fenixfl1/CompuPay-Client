@@ -8,10 +8,12 @@ const CustomModal: React.FC<ModalProps> = ({
   cancelText = "Cancelar",
   okButtonProps = { icon: <CheckOutlined />, size: defaultTheme.size },
   cancelButtonProps = { icon: <StopOutlined />, size: defaultTheme.size },
+  closable = false,
   ...props
 }) => {
   return (
     <Modal
+      closable={closable}
       cancelButtonProps={cancelButtonProps}
       okButtonProps={okButtonProps}
       okText={okText}

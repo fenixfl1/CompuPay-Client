@@ -279,8 +279,8 @@ const TaskInfo: React.FC<TaskInfoProps> = ({ open, onClose }) => {
               </CustomRow>
             </CustomCol>
             <Tag
-              color={priority[task?.PRIORITY].color}
-              icon={priority[task?.PRIORITY].icon}
+              color={priority[task?.PRIORITY]?.color}
+              icon={priority[task?.PRIORITY]?.icon}
             >
               Prioridad {priority[task?.PRIORITY].label}
             </Tag>

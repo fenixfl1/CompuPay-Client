@@ -31,6 +31,7 @@ import {
   DollarOutlined,
   FilterOutlined,
   DeleteOutlined,
+  PrinterOutlined,
 } from "@ant-design/icons"
 import errorHandler from "@/helpers/errorHandler"
 import useUpdatePayrollEntry from "@/services/hooks/payroll/useUpdatePayrollEntry"
@@ -215,6 +216,7 @@ const PayrollTable: React.FC<PayrollTableProps> = ({ payrollId }) => {
         condition: {
           USERS: [record.USER],
           PAYROLL_ID: record.PAYROLL,
+          INCLUDES_OVERTIME: true,
         },
       })
 
@@ -355,6 +357,13 @@ const PayrollTable: React.FC<PayrollTableProps> = ({ payrollId }) => {
       render: currencyFormatter,
     },
     {
+      hidden: !payrollInfo?.INCLUDES_OVERTIME,
+      key: "OVERTIMES",
+      dataIndex: "OVERTIMES",
+      title: "Horas extras",
+      render: currencyFormatter,
+    },
+    {
       key: "BONUS",
       dataIndex: "BONUS",
       title: "Bonos",
@@ -364,6 +373,13 @@ const PayrollTable: React.FC<PayrollTableProps> = ({ payrollId }) => {
       key: "DISCOUNT",
       dataIndex: "DISCOUNT",
       title: "Descuentos",
+      render: currencyFormatter,
+    },
+    {
+      hidden: !payrollInfo?.INCLUDES_LEAVES,
+      key: "OTHER_DISCOUNT",
+      dataIndex: "OTHER_DISCOUNT",
+      title: "Otros descuentos",
       render: currencyFormatter,
     },
     {
@@ -404,10 +420,17 @@ const PayrollTable: React.FC<PayrollTableProps> = ({ payrollId }) => {
           ? record.AFP + record.SFS + record.ISR
           : 0
 
+        const overtime = payrollInfo.INCLUDES_OVERTIME ? record.OVERTIMES : 0
+        const other_discount = payrollInfo.INCLUDES_LEAVES
+          ? record.OTHER_DISCOUNT
+          : 0
+
         const salary =
           record.SALARY / payrollInfo.PAYROLL_CONFIG.PERIODS +
+          overtime +
           record.BONUS -
           record.DISCOUNT -
+          other_discount -
           withholdingValue
         return (
           <span>
@@ -573,15 +596,27 @@ const PayrollTable: React.FC<PayrollTableProps> = ({ payrollId }) => {
   const tableTitle = () => (
     <CustomCol xs={24}>
       <CustomRow justify={"space-between"}>
-        <CustomTooltip title={"Filtros"}>
-          <CustomPopover title={"Filtros"} content={popoverContent}>
-            <CustomButton
-              size={"large"}
-              type={"text"}
-              icon={<FilterOutlined />}
-            />
-          </CustomPopover>
-        </CustomTooltip>
+        <CustomCol xs={4} md={6} lg={10}>
+          <CustomRow gap={15} justify={"start"}>
+            <CustomTooltip title={"Filtros"}>
+              <CustomPopover title={"Filtros"} content={popoverContent}>
+                <CustomButton
+                  size={"large"}
+                  type={"text"}
+                  icon={<FilterOutlined />}
+                />
+              </CustomPopover>
+            </CustomTooltip>
+
+            <CustomTooltip title={"Generar Reporte"}>
+              <CustomButton
+                size={"large"}
+                icon={<PrinterOutlined />}
+                type={"text"}
+              />
+            </CustomTooltip>
+          </CustomRow>
+        </CustomCol>
 
         <CustomCol xs={24} md={18} lg={10}>
           <CustomSearch

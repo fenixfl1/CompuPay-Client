@@ -1,10 +1,12 @@
 import moment from "moment"
 import capitalize from "./capitalize"
+import dayjs from "dayjs"
 
 export const DATE_TIME_FORMAT = "YYYY-MM-DD HH:mm:ss"
 export const LONG_DATE_TIME_FORMAT = "dddd D [de] MMMM [del] YYYY h:mm:ss A"
 export const LOG_DATE_FORMAT = "dddd D [de] MMMM [del] YYYY"
 export const DATE_FORMAT = "DD/MM/YYYY"
+export const TIME_FORMAT = "HH:mm"
 
 type StrDate = string | undefined
 
@@ -42,4 +44,12 @@ export const compareDate = (
   } else {
     return 0 // dates are equal
   }
+}
+
+export const getTime = (time: dayjs.Dayjs) => {
+  return time?.format(TIME_FORMAT)
+}
+
+export const toDayjs = (date: string, format = DATE_FORMAT) => {
+  return dayjs(date, format)
 }

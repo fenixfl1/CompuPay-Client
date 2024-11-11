@@ -1,23 +1,9 @@
 "use client"
 
 import React, { useEffect, useState, useTransition } from "react"
-import CustomLayout from "./custom/CustomLayout"
 import styled from "styled-components"
 import Darkreader from "react-darkreader-2"
-import {
-  CustomAvatar,
-  CustomBadge,
-  CustomButton,
-  CustomCol,
-  CustomContent,
-  CustomHeader,
-  CustomMenu,
-  CustomRow,
-  CustomSider,
-  CustomSpace,
-  CustomSpin,
-  CustomText,
-} from "./custom"
+
 import {
   getDarkMode,
   getSessionInfo,
@@ -25,11 +11,9 @@ import {
   removeSession,
   setDarkMode,
 } from "@/lib/session"
-import ConditionalComponent from "./ConditionalComponent"
 import { PATH_HOME } from "@/constants/routes"
 import { useGetMenuOptions } from "@/services/hooks"
 import useMenuOptionStore from "@/stores/useMenuOptionStore"
-import SVGReader from "./SVGReader"
 import {
   BellOutlined,
   LogoutOutlined,
@@ -43,17 +27,33 @@ import { MenuOption } from "@/interfaces/user"
 import getSelectedOption from "@/helpers/getSelectedOption"
 import { useRouter } from "next/navigation"
 import useModalStore from "@/stores/modalStore"
-import MotionComponent from "./MotionComponent"
 import useDrawerStore from "@/stores/drawerStore"
 import useGetUser from "@/services/hooks/user/useGetUser"
-import { CustomModalConfirmation } from "./custom/CustomModalMethods"
 import useIsAuthorized from "@/hooks/useIsAuthorized"
 import { GenericParameters } from "@/interfaces/parameters"
 import { assert } from "@/helpers/assert"
 import EmployeeProfile from "@/app/employees/components/EmployeeProfile"
-import Fallback from "./Fallback"
 import Link from "next/link"
-import Notifications from "./Notifications"
+import ConditionalComponent from "@/components/ConditionalComponent"
+import {
+  CustomRow,
+  CustomContent,
+  CustomSider,
+  CustomLayout,
+  CustomAvatar,
+  CustomCol,
+  CustomSpace,
+  CustomText,
+  CustomMenu,
+  CustomButton,
+  CustomHeader,
+  CustomSpin,
+} from "@/components/custom"
+import { CustomModalConfirmation } from "@/components/custom/CustomModalMethods"
+import MotionComponent from "@/components/MotionComponent"
+import Notifications from "@/components/Notifications"
+import SVGReader from "@/components/SVGReader"
+import jsonParse from "@/helpers/jsonParse"
 
 const LogoContainer = styled.div`
   height: 75px;
@@ -146,11 +146,8 @@ const LogoutContainer = styled.div`
   align-items: center;
   padding: 16px;
 `
-interface WrapperProps {
-  children: React.ReactNode
-}
 
-const Wrapper: React.FC<WrapperProps> = (props) => {
+const Template: React.FC<React.PropsWithChildren> = ({ children }) => {
   const router = useRouter()
   const [isPending] = useTransition()
   const { setOpenDrawer, open } = useDrawerStore()
@@ -158,8 +155,14 @@ const Wrapper: React.FC<WrapperProps> = (props) => {
 
   const [isDarkMode, setIsDarkMode] = useState(getDarkMode())
 
-  const { parameters, menuOptions, setSelectedMenuOption, setParameters } =
-    useMenuOptionStore()
+  const {
+    selectedItem,
+    parameters,
+    menuOptions,
+    setSelectedMenuOption,
+    setParameters,
+    setSelectedKey,
+  } = useMenuOptionStore()
 
   const { isPending: menuOptionIsPending } = useGetMenuOptions(!isLoggedIn())
   const { mutateAsync: getUser, isPending: isUserPending } = useGetUser()
@@ -169,7 +172,9 @@ const Wrapper: React.FC<WrapperProps> = (props) => {
   const operationCreate =
     parameters?.ID_OPERACION_CREAR_EMPLEADOS ||
     parameters?.ID_OPERACION_CREAR_TAREAS ||
-    parameters?.ID_OPERACION_CREAR_NOMINA
+    parameters?.ID_OPERACION_CREAR_NOMINA ||
+    parameters?.ID_OPERACION_CREAR_TIEMPO_FUERA ||
+    parameters?.ID_OPERACION_CREAR_HORAS_EXTRAS
 
   const canCreate = useIsAuthorized(Number(operationCreate))
 
@@ -179,6 +184,12 @@ const Wrapper: React.FC<WrapperProps> = (props) => {
 
   useEffect(() => {
     setIsDarkMode(getDarkMode())
+  }, [])
+
+  useEffect(() => {
+    setSelectedKey(
+      jsonParse<string[]>(sessionStorage.getItem("selectedKeys") as string)
+    )
   }, [])
 
   useEffect(() => {
@@ -197,31 +208,41 @@ const Wrapper: React.FC<WrapperProps> = (props) => {
     })
   }
 
-  const handleOnSelect = (item: MenuOption) => {
+  const handleOnSelect = (item: MenuOption, keyPath: string[]) => {
+    if (item.children?.length) return
     if (item.type !== "link") {
+      router.push(item.path)
       setSelectedMenuOption(item)
       setParameters(item.parameters)
+      setSelectedKey(keyPath)
+      sessionStorage.setItem("selectedKeys", JSON.stringify(keyPath))
     }
   }
 
-  const items: ItemType[] = menuOptions.map(({ icon, label, ...item }) => ({
-    ...item,
-    icon: <SVGReader svg={icon as string} />,
-    type: item.type as any,
-    onClick: () => handleOnSelect({ ...item, label }),
-    label: (
-      <ConditionalComponent condition={!!item.path} fallback={label}>
-        <Link href={item.path} passHref legacyBehavior>
-          <a target={item.type === "link" ? "_blank" : undefined}>{label}</a>
-        </Link>
-      </ConditionalComponent>
-    ),
-  }))
+  const renderMenuItems = (menu: MenuOption[]): ItemType[] => {
+    return menu?.map(({ icon, ...item }) => ({
+      ...item,
+      children: renderMenuItems(item.children as MenuOption[]),
+      icon: <SVGReader svg={icon as string} />,
+      type: item.type as any,
+      onClick: ({ keyPath }) => handleOnSelect(item, keyPath),
+      label: (
+        <ConditionalComponent
+          condition={item.type === "link"}
+          fallback={item.label}
+        >
+          <Link href={item.path} passHref legacyBehavior>
+            <a target={"_blank"}>{item.label}</a>
+          </Link>
+        </ConditionalComponent>
+      ),
+    }))
+  }
 
   return (
     <ConditionalComponent
       condition={isLoggedIn() || menuOptionIsPending}
-      fallback={props.children}
+      fallback={children}
     >
       <>
         <CustomLayout hasSider>
@@ -266,8 +287,11 @@ const Wrapper: React.FC<WrapperProps> = (props) => {
             <CustomMenu
               theme="light"
               mode="inline"
-              defaultSelectedKeys={[getSelectedOption()?.key]}
-              items={items}
+              openKeys={selectedItem?.length > 1 ? selectedItem : undefined}
+              selectedKeys={selectedItem}
+              defaultOpenKeys={selectedItem}
+              defaultSelectedKeys={selectedItem}
+              items={renderMenuItems(menuOptions)}
             />
 
             <LogoutContainer>
@@ -325,9 +349,7 @@ const Wrapper: React.FC<WrapperProps> = (props) => {
             <Content>
               <CustomContentContainer>
                 <MotionComponent key={isPending ? 1 : 0}>
-                  <CustomSpin spinning={isUserPending}>
-                    {props.children}
-                  </CustomSpin>
+                  <CustomSpin spinning={isUserPending}>{children}</CustomSpin>
                 </MotionComponent>
               </CustomContentContainer>
             </Content>
@@ -342,4 +364,4 @@ const Wrapper: React.FC<WrapperProps> = (props) => {
   )
 }
 
-export default Wrapper
+export default Template

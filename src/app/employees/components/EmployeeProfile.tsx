@@ -107,8 +107,8 @@ const EmployeeProfile: React.FC = () => {
       sessionStorage.setItem("avatar", url)
       form.resetFields()
       customNotification({
-        message: 'Operación Exitosa',
-        description: "Foto de perfil actualizada con éxito."
+        message: "Operación Exitosa",
+        description: "Foto de perfil actualizada con éxito.",
       })
       setShowChangeProfileOptions(false)
     } catch (error) {
@@ -293,7 +293,7 @@ const EmployeeProfile: React.FC = () => {
     {
       key: "SUPERVISOR",
       label: "Supervisor",
-      children: `@${user.SUPERVISOR}`,
+      children: user.SUPERVISOR ? `@${user.SUPERVISOR}` : undefined,
     },
   ]
 

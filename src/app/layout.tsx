@@ -6,7 +6,6 @@ import { AntdRegistry } from "@ant-design/nextjs-registry"
 import StyledComponentsRegistry from "@/lib/registry"
 import GlobalStyles from "@/styles/GlobalStyles"
 import ConditionalComponent from "@/components/ConditionalComponent"
-import Wrapper from "@/components/Wrapper"
 import Fallback from "@/components/Fallback"
 import { QueryClientProvider } from "@tanstack/react-query"
 import queryClient from "@/lib/appClient"
@@ -48,7 +47,7 @@ const RootLayout: React.FC<React.PropsWithChildren> = ({ children }) => {
                       fallback={<Fallback />}
                     >
                       <ThemeProvider theme={defaultTheme}>
-                        <Wrapper>{children}</Wrapper>
+                        {children}
                       </ThemeProvider>
                     </ConditionalComponent>
                   </ConfigProvider>

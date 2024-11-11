@@ -7,18 +7,22 @@ import {
 } from "@/interfaces/payroll"
 import {
   CustomAvatar,
+  CustomButton,
   CustomParagraph,
   CustomRow,
   CustomSpace,
+  CustomSpin,
   CustomTable,
   CustomTag,
   CustomText,
+  CustomTooltip,
 } from "@/components/custom"
 import formatter from "@/helpers/formatter"
 import randomHexColorCode from "@/helpers/random-hex-color-code"
 import useGetPayrollHistory from "@/services/hooks/payroll/useGetPayrollHistory"
 import capitalize from "@/helpers/capitalize"
 import usePayrollStore from "@/stores/payrollStore"
+import { PrinterOutlined } from "@ant-design/icons"
 
 const currencyFormatter = (value: string, record: PayrollEntry) =>
   formatter({
@@ -31,6 +35,7 @@ const currencyFormatter = (value: string, record: PayrollEntry) =>
 const PayrollHistoryTable: React.FC = () => {
   const {
     mutateAsync: getPayrollHistory,
+    isPending: isGetPending,
     data: { data },
   } = useGetPayrollHistory()
 
@@ -136,6 +141,20 @@ const PayrollHistoryTable: React.FC = () => {
         width: "10%",
         align: "center",
       },
+      {
+        title: "Acciones",
+        key: " ACTIONS",
+        width: "5%",
+        render: () => (
+          <CustomTooltip title={"Generar Reporte"}>
+            <CustomButton
+              size={"large"}
+              icon={<PrinterOutlined />}
+              type={"text"}
+            />
+          </CustomTooltip>
+        ),
+      },
     ]
 
     const paymentDetails = (
@@ -231,16 +250,32 @@ const PayrollHistoryTable: React.FC = () => {
         </CustomTag>
       ),
     },
+    {
+      title: "Acciones",
+      key: " ACTIONS",
+      width: "5%",
+      render: () => (
+        <CustomTooltip title={"Generar Reporte"}>
+          <CustomButton
+            size={"large"}
+            icon={<PrinterOutlined />}
+            type={"text"}
+          />
+        </CustomTooltip>
+      ),
+    },
   ]
 
   return (
-    <CustomTable
-      size={"large"}
-      columns={columns}
-      dataSource={data}
-      expandable={{ expandedRowRender }}
-      rowKey={(record) => record.PAYROLL_ID}
-    />
+    <CustomSpin spinning={isGetPending}>
+      <CustomTable
+        size={"large"}
+        columns={columns}
+        dataSource={data}
+        expandable={{ expandedRowRender }}
+        rowKey={(record) => record.PAYROLL_ID}
+      />
+    </CustomSpin>
   )
 }
 

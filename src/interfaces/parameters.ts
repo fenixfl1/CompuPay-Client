@@ -5,6 +5,8 @@ export interface EmployeesParameters {
   ID_ROLES_EMPLEADOS: string
   ID_ROLES_NO_EMPLEADOS: string
   ID_OPERACION_CAMBIAR_ESTADO_EMPLEADOS: string
+  USER_REPORT_COLUMNS_WIDTH: string
+  USER_REPORT_COLUMNS: string
 }
 
 export interface TasksParameters {
@@ -18,4 +20,6 @@ export interface GenericParameters {
   ID_OPERACION_CREAR_EMPLEADOS: string
   ID_OPERACION_CREAR_TAREAS: string
   ID_OPERACION_CREAR_NOMINA: string
+  ID_OPERACION_CREAR_TIEMPO_FUERA: string
+  ID_OPERACION_CREAR_HORAS_EXTRAS: string
 }
