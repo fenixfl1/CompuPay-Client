@@ -172,6 +172,14 @@ const EmployeeProfile: React.FC = () => {
       children: `@${user.USERNAME}`,
     },
     {
+      key: "IDENTITY_DOCUMENT",
+      label: "Doc. Identidad",
+      children: formatter({
+        value: user.IDENTITY_DOCUMENT,
+        format: "document",
+      }),
+    },
+    {
       key: "PASSWORD",
       label: isMyProfile ? "Contraseña" : "",
       children: (

@@ -115,6 +115,8 @@ const LeavesForm: React.FC<LeavesFormProps> = ({ form }) => {
       data.START_DATE = data.START_DATE.format("YYYY-MM-DD")
       data.END_DATE = data.END_DATE.format("YYYY-MM-DD")
 
+      delete data.INCLUDE_WEEKEND
+
       if (!!leave.LEAVE_ID) {
         const newData = { ...leave, ...data }
 

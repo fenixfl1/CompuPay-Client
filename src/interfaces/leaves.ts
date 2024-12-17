@@ -9,4 +9,5 @@ interface Leave {
   DATE_RANGE: string
   DESC_CONCEPT: string
   STATE: string
+  IS_PAID: boolean
 }

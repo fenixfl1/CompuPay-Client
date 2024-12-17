@@ -21,9 +21,6 @@ import { AdvancedCondition } from "@/services/interfaces"
 import useUserStore from "@/stores/userStore"
 import errorHandler from "@/helpers/errorHandler"
 import useGenerateReport from "@/services/hooks/reports/useGenerateReport"
-import { WEB_API_GET_USER_REPORT } from "@/constants/routes"
-import PDFRender from "@/components/PDFRender"
-import ConditionalComponent from "@/components/ConditionalComponent"
 import { openReport } from "@/helpers/open-report"
 
 const EmployeesTable = React.lazy(
@@ -42,7 +39,7 @@ const page: NextPage = () => {
   const { users, metadata } = useUserStore()
 
   const { mutateAsync: generateReport, isPending: isGenerateReportPending } =
-    useGenerateReport(WEB_API_GET_USER_REPORT)
+    useGenerateReport("users")
   const { mutateAsync: getRolesList, isPending } = useGetRolesList()
   const { mutateAsync: getUserList, isPending: isEmployeesPending } =
     useGetUserLIst()
@@ -103,7 +100,7 @@ const page: NextPage = () => {
       if (values.SEARCH_OPTIONS || debounce) {
         condition.push({
           dataType: "str",
-          field: values.SEARCH_OPTIONS ?? ["name", "last_name"],
+          field: values.SEARCH_OPTIONS ?? ["name", "last_name", "user_id"],
           operator: "ILIKE",
           condition: debounce,
         })
@@ -147,7 +144,13 @@ const page: NextPage = () => {
         })
       }
 
-      setCondition(condition)
+      setCondition(
+        condition.filter(
+          (item) =>
+            item.field !== "username" &&
+            item.condition !== getSessionInfo().USERNAME
+        )
+      )
 
       getUserList({ page, size, condition })
     },
@@ -158,16 +161,8 @@ const page: NextPage = () => {
 
   const handleGenerateReport = async () => {
     try {
-      const column_widths = USER_REPORT_COLUMNS_WIDTH.split(",").map((key) =>
-        Number(key)
-      )
-
-      const fields = USER_REPORT_COLUMNS.split(",")
-
       const response = await generateReport({
         condition,
-        column_widths,
-        fields,
       })
 
       openReport(response)

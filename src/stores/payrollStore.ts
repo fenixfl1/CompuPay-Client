@@ -4,7 +4,7 @@ import { PayrollEntry, PayrollInfo } from "@/interfaces/payroll"
 
 const metadata: Metadata = {
   page: 1,
-  page_size: 10,
+  page_size: 20,
   total: 0,
   next_page: 0,
 }

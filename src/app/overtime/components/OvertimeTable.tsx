@@ -25,7 +25,6 @@ import useOvertimeStore from "@/stores/overtimes"
 import {
   CheckOutlined,
   CloseOutlined,
-  DeleteOutlined,
   EditOutlined,
   FilterOutlined,
   StopOutlined,
@@ -126,6 +125,7 @@ const OvertimeTable: React.FC<OvertimeTableProps> = ({
             split={<CustomDivider type={"vertical"} />}
           >
             <CustomButton
+              disabled={record.PAID}
               type={"link"}
               icon={<EditOutlined />}
               onClick={() => handleOnEdit(record)}
@@ -144,7 +144,7 @@ const OvertimeTable: React.FC<OvertimeTableProps> = ({
                   type={"link"}
                   icon={
                     isActive ? (
-                      <DeleteOutlined />
+                      <StopOutlined />
                     ) : (
                       <StopOutlined style={{ color: colorTextQuaternary }} />
                     )

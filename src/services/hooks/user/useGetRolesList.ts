@@ -7,6 +7,7 @@ import useRolesStore from "@/stores/rolesStore"
 
 const initialData: ReturnPayload<Roles[]> = {
   data: [],
+  message: "",
   metadata: {
     page: 1,
     page_size: 10,
@@ -26,14 +27,12 @@ function useGetRolesList() {
       setMetadata(metadata)
     },
     mutationFn: async ({ condition, page, size }) => {
-      const {
-        data: { data, metadata },
-      } = await postRequest<Roles[]>(
+      const { data } = await postRequest<Roles[]>(
         `${WEB_API_GET_ROLES_LIST}?page=${page}&size=${size}`,
         { condition }
       )
 
-      return { data, metadata }
+      return data
     },
   })
 }

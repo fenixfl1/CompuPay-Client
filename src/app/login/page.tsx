@@ -7,15 +7,17 @@ import { useAuthenticateUser } from "@/services/hooks"
 import { CustomSpin } from "@/components/custom"
 import { useRouter } from "next/navigation"
 import { createSession } from "@/lib/session"
+import { assert } from "@/helpers/assert"
+import { AxiosError } from "axios"
+import { useState } from "react"
 
 const page: NextPage = () => {
   const router = useRouter()
   const [form] = Form.useForm()
-  const {
-    mutateAsync: authenticateUser,
-    isPending,
-    isError,
-  } = useAuthenticateUser()
+
+  const [message, setMessage] = useState<string>()
+
+  const { mutateAsync: authenticateUser, isPending } = useAuthenticateUser()
 
   const handleOnFinish = async () => {
     try {
@@ -23,15 +25,20 @@ const page: NextPage = () => {
       const response = await authenticateUser(data)
       createSession(response)
       window.location.reload()
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error({ error })
+    } catch (error: any) {
+      assert<AxiosError>(error)
+      setMessage(error?.response?.data?.["error" as never])
     }
   }
 
   return (
     <CustomSpin spinning={isPending}>
-      <LoginForm form={form} onFinish={handleOnFinish} isFailed={isError} />
+      <LoginForm
+        form={form}
+        onFinish={handleOnFinish}
+        message={message}
+        onClose={() => setMessage(undefined)}
+      />
     </CustomSpin>
   )
 }

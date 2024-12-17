@@ -51,3 +51,8 @@ export type ValidateStatus =
   | "warning"
   | "validating"
   | undefined
+
+export interface Options {
+  label: React.ReactNode
+  value: any
+}

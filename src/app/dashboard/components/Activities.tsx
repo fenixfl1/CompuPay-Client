@@ -10,7 +10,7 @@ import {
 import formatter from "@/helpers/formatter"
 import useActivityStore from "@/stores/activitiesStore"
 import {
-  DeleteOutlined,
+  StopOutlined,
   EditOutlined,
   PlusCircleOutlined,
   UndoOutlined,
@@ -65,7 +65,7 @@ const colors: Record<number, string> = {
 const icons: Record<string, React.ReactNode> = {
   1: <PlusCircleOutlined />,
   2: <EditOutlined />,
-  3: <DeleteOutlined />,
+  3: <StopOutlined />,
 }
 
 interface ActivitiesProps {

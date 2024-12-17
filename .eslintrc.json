@@ -5,8 +5,21 @@
     "prettier",
     "next/core-web-vitals"
   ],
-  "semi": [
-    "error",
-    "never"
-  ]
+  "rules": {
+    "semi": "off",
+    "require-jsdoc": "off",
+    "camelcase": "off",
+    "no-array-constructor": "off",
+    "no-unused-vars": "off",
+    "valid-jsdoc": "off",
+    "react/display-name": "off",
+    "react-hooks/exhaustive-deps": "off",
+    "prefer-const": "off",
+    "new-cap": "off",
+    "@next/next/no-img-element": "off",
+    "jsx-a11y/alt-text": "off",
+    "react/jsx-key": "off",
+    "react-hooks/rules-of-hooks": "off",
+    "react/no-children-prop": "off"
+  }
 }

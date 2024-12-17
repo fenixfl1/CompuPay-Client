@@ -13,8 +13,6 @@ import {
   CustomLayout,
   CustomPasswordInput,
   CustomRow,
-  CustomText,
-  CustomWatermark,
 } from "@/components/custom"
 import { formItemLayout } from "@/styles/breakpoints"
 import { LoginOutlined } from "@ant-design/icons"
@@ -51,10 +49,16 @@ const LoginContainer = styled.div`
 interface LoginFormProps {
   onFinish?: (e: React.MouseEvent<HTMLElement, MouseEvent>) => void
   form: FormInstance
-  isFailed?: boolean
+  message?: string
+  onClose?: () => void
 }
 
-const LoginForm: NextPage<LoginFormProps> = ({ onFinish, form, isFailed }) => {
+const LoginForm: NextPage<LoginFormProps> = ({
+  onFinish,
+  form,
+  message,
+  onClose,
+}) => {
   return (
     <Layout>
       <CustomRow justify={"center"}>
@@ -78,13 +82,15 @@ const LoginForm: NextPage<LoginFormProps> = ({ onFinish, form, isFailed }) => {
                         <img width={"100%"} src={"/assets/text.svg"} />
                       </LoginLogoContainer>
                     </CustomCol>
-                    <ConditionalComponent condition={isFailed}>
+                    <ConditionalComponent condition={!!message}>
                       <CustomCol span={24}>
                         <CustomAlert
-                          message={"Usuario y/o contraseña incorrectos"}
-                          type={"error"}
-                          showIcon
                           closable
+                          description={message}
+                          message={"Error"}
+                          showIcon
+                          type={"error"}
+                          onClose={onClose}
                         />
                       </CustomCol>
                     </ConditionalComponent>
@@ -110,7 +116,7 @@ const LoginForm: NextPage<LoginFormProps> = ({ onFinish, form, isFailed }) => {
                     </CustomCol>
 
                     <CustomCol span={24}>
-                      <CustomRow justify={"space-between"}>
+                      <CustomRow justify={"start"}>
                         <CustomFormItem
                           name={"remember"}
                           valuePropName="checked"
@@ -118,11 +124,13 @@ const LoginForm: NextPage<LoginFormProps> = ({ onFinish, form, isFailed }) => {
                           <CustomCheckbox>Recordarme</CustomCheckbox>
                         </CustomFormItem>
 
-                        <CustomFormItem>
-                          <CustomButton type={"link"}>
-                            Olvide mi contraseña
-                          </CustomButton>
-                        </CustomFormItem>
+                        <ConditionalComponent condition={false}>
+                          <CustomFormItem>
+                            <CustomButton type={"link"}>
+                              Olvide mi contraseña
+                            </CustomButton>
+                          </CustomFormItem>
+                        </ConditionalComponent>
                       </CustomRow>
                     </CustomCol>
 

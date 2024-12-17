@@ -6,6 +6,7 @@ import useActivityStore from "@/stores/activitiesStore"
 
 const initialData: ReturnPayload<Activity[]> = {
   data: [],
+  message: "",
   metadata: {
     page: 1,
     page_size: 10,
@@ -23,16 +24,14 @@ function useGetRecentActivities() {
     mutationKey: ["dashboard", "get-recent-activities"],
     onSuccess: setActivities,
     mutationFn: async ({ condition, page, size }) => {
-      const {
-        data: { data, metadata },
-      } = await postRequest<Activity[]>(
+      const { data } = await postRequest<Activity[]>(
         `${WEB_API_GET_RECENT_ACTIVITIES}?page=${page}&page_size=${size}`,
         {
           condition,
         }
       )
 
-      return { data, metadata }
+      return data
     },
   })
 }

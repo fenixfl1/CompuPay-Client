@@ -14,13 +14,15 @@ import {
 } from "@/components/custom"
 import { customNotification } from "@/components/custom/customNotification"
 import errorHandler from "@/helpers/errorHandler"
+import jsonParse from "@/helpers/jsonParse"
 import useDebounce from "@/hooks/useDebounce"
 import useResetFormOnCloseModal from "@/hooks/useResetFormOnCloseModal"
 import { Adjustment } from "@/interfaces/payroll"
 import { User } from "@/interfaces/user"
-import useCreateAdjustment from "@/services/hooks/payroll/useCreateAjustment"
+import useCreateAdjustment from "@/services/hooks/payroll/useCreateAdjustment"
 import { useGetUserLIst } from "@/services/hooks/user/useGetUserList"
 import { AdvancedCondition } from "@/services/interfaces"
+import useMenuOptionStore from "@/stores/useMenuOptionStore"
 import {
   defaultBreakpoints,
   formItemLayout,
@@ -56,7 +58,15 @@ const AdjustmentForm: React.FC<AdjustmentFormProps> = ({
 
   useResetFormOnCloseModal(form, open)
 
+  const { parameters } = useMenuOptionStore<{
+    LIST_ADJUSTMENTS_CONCEPTS: string
+  }>()
+
   const isEditing = !!record
+
+  const conceptList = jsonParse<Record<string, unknown>[]>(
+    parameters?.LIST_ADJUSTMENTS_CONCEPTS
+  )
 
   useEffect(() => {
     isEditing && form.setFieldsValue({ ...record })
@@ -138,17 +148,14 @@ const AdjustmentForm: React.FC<AdjustmentFormProps> = ({
 
             <CustomCol {...defaultBreakpoints}>
               <CustomFormItem
-                label={"Tipo"}
-                name={"TYPE"}
+                label={"Concepto"}
+                name={"CONCEPT"}
                 rules={[{ required: true }]}
               >
                 <CustomSelect
                   allowClear
                   placeholder={"Seleccionar tipo de ajustamiento"}
-                  options={[
-                    { label: "Bono", value: "B" },
-                    { label: "Descuento", value: "D" },
-                  ]}
+                  options={conceptList}
                 />
               </CustomFormItem>
             </CustomCol>

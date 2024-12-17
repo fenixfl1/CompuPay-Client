@@ -176,7 +176,7 @@ const Template: React.FC<React.PropsWithChildren> = ({ children }) => {
     parameters?.ID_OPERACION_CREAR_TIEMPO_FUERA ||
     parameters?.ID_OPERACION_CREAR_HORAS_EXTRAS
 
-  const canCreate = useIsAuthorized(Number(operationCreate))
+  const canCreate = useIsAuthorized(operationCreate)
 
   useEffect(() => {
     typeof isDarkMode === "boolean" && setDarkMode(isDarkMode)

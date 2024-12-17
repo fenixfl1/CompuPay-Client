@@ -7,9 +7,10 @@ import usePayrollStore from "@/stores/payrollStore"
 
 const initialData: ReturnPayload<PayrollEntry[]> = {
   data: [],
+  message: "",
   metadata: {
     page: 1,
-    page_size: 10,
+    page_size: 20,
     total: 0,
     next_page: 1,
     previous_page: "",
@@ -23,14 +24,12 @@ function useGetPayrollEntries() {
     mutationKey: ["payroll", "get-payroll-entries"],
     onSuccess: setPayrollEntries,
     mutationFn: async ({ condition, page, size }) => {
-      const {
-        data: { data, metadata },
-      } = await postRequest<PayrollEntry[]>(
+      const { data } = await postRequest<PayrollEntry[]>(
         `${WEB_API_GET_PAYROLL_ENTRIES}?page=${page}&page_size=${size}`,
         { condition }
       )
 
-      return { data, metadata }
+      return data
     },
   })
 }

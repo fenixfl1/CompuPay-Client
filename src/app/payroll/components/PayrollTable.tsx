@@ -30,7 +30,7 @@ import randomHexColorCode from "@/helpers/random-hex-color-code"
 import {
   DollarOutlined,
   FilterOutlined,
-  DeleteOutlined,
+  StopOutlined,
   PrinterOutlined,
 } from "@ant-design/icons"
 import errorHandler from "@/helpers/errorHandler"
@@ -48,6 +48,8 @@ import useIsAuthorized from "@/hooks/useIsAuthorized"
 import ConditionalComponent from "@/components/ConditionalComponent"
 import { useWebSocket } from "@/context/web-socket"
 import moment from "moment"
+import useGenerateReport from "@/services/hooks/reports/useGenerateReport"
+import { openReport } from "@/helpers/open-report"
 
 const optionStyles: React.CSSProperties = {
   width: "100%",
@@ -109,6 +111,7 @@ const PayrollTable: React.FC<PayrollTableProps> = ({ payrollId }) => {
 
   const socket = useWebSocket()
 
+  const [condition, setCondition] = useState<AdvancedCondition[]>([])
   const [searchValue, setSearchValue] = useState("")
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const [shouldUpdate, setShouldUpdate] = useState(false)
@@ -125,6 +128,8 @@ const PayrollTable: React.FC<PayrollTableProps> = ({ payrollId }) => {
     mutateAsync: processPartialPayroll,
     isPending: isProcessPartialPending,
   } = useProcessPartialPayroll()
+  const { mutateAsync: generateReport, isPending: isGenerateReportPending } =
+    useGenerateReport("payroll")
 
   const { OPERATION_ID_PROCESS_PAYROLL, OPERATION_ID_REMOVE_PAYROLL_ENTRY } =
     parameters
@@ -184,6 +189,8 @@ const PayrollTable: React.FC<PayrollTableProps> = ({ payrollId }) => {
           condition: debounce,
         })
       }
+
+      setCondition(condition)
 
       getPayrollEntries({ condition, page, size })
     },
@@ -317,6 +324,19 @@ const PayrollTable: React.FC<PayrollTableProps> = ({ payrollId }) => {
     })
   }
 
+  const handleOnGenerateReporte = async () => {
+    try {
+      const response = await generateReport({
+        condition,
+        rp_name: "current_payroll",
+      })
+
+      openReport(response, "Reporte de nómina")
+    } catch (error) {
+      errorHandler(error)
+    }
+  }
+
   const currencyFormatter = (value: string, record: PayrollEntry) =>
     formatter({
       value,
@@ -367,6 +387,13 @@ const PayrollTable: React.FC<PayrollTableProps> = ({ payrollId }) => {
       key: "BONUS",
       dataIndex: "BONUS",
       title: "Bonos",
+      render: currencyFormatter,
+    },
+    {
+      hidden: !payrollInfo?.INCLUDES_LEAVES,
+      key: "VACATIONS",
+      dataIndex: "VACATIONS",
+      title: "Vacaciones",
       render: currencyFormatter,
     },
     {
@@ -424,10 +451,12 @@ const PayrollTable: React.FC<PayrollTableProps> = ({ payrollId }) => {
         const other_discount = payrollInfo.INCLUDES_LEAVES
           ? record.OTHER_DISCOUNT
           : 0
+        const vacations = payrollInfo.INCLUDES_LEAVES ? record.VACATIONS : 0
 
         const salary =
           record.SALARY / payrollInfo.PAYROLL_CONFIG.PERIODS +
           overtime +
+          vacations +
           record.BONUS -
           record.DISCOUNT -
           other_discount -
@@ -452,6 +481,7 @@ const PayrollTable: React.FC<PayrollTableProps> = ({ payrollId }) => {
       align: "center",
     },
     {
+      fixed: "right",
       key: "ACTIONS",
       title: "Acciones",
       align: "center",
@@ -504,7 +534,7 @@ const PayrollTable: React.FC<PayrollTableProps> = ({ payrollId }) => {
                 size="middle"
                 danger
                 type="link"
-                icon={<DeleteOutlined />}
+                icon={<StopOutlined />}
               />
             </CustomTooltip>
           </ConditionalComponent>
@@ -613,6 +643,7 @@ const PayrollTable: React.FC<PayrollTableProps> = ({ payrollId }) => {
                 size={"large"}
                 icon={<PrinterOutlined />}
                 type={"text"}
+                onClick={handleOnGenerateReporte}
               />
             </CustomTooltip>
           </CustomRow>
@@ -631,10 +662,10 @@ const PayrollTable: React.FC<PayrollTableProps> = ({ payrollId }) => {
   const footer = () => (
     <CustomForm form={form}>
       <CustomRow justify={"start"}>
-        <CustomCol xs={24} md={18} lg={12}>
+        <CustomCol xs={24} md={18}>
           <CustomFormItem label={"Acción"}>
-            <CustomInputGroup compact>
-              <CustomCol xs={24}>
+            <CustomRow justify={"start"}>
+              <CustomCol xs={8}>
                 <CustomFormItem label={"Acción"} noStyle name={"ACTION"}>
                   <CustomSelect
                     disabled={!selectedRowKeys.length}
@@ -654,7 +685,7 @@ const PayrollTable: React.FC<PayrollTableProps> = ({ payrollId }) => {
                   Ejecutar
                 </CustomButton>
               </CustomFormItem>
-            </CustomInputGroup>
+            </CustomRow>
           </CustomFormItem>
         </CustomCol>
       </CustomRow>

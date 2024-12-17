@@ -1,19 +1,30 @@
-import {} from "@/constants/routes"
+import { WEB_API_GENERATE_REPORT } from "@/constants/routes"
 import { useCustomMutation } from "@/hooks/useCustomMutation"
-import { postRequest } from "@/services/api"
-import { AdvancedCondition, GetPayload } from "@/services/interfaces"
+import { getRequest, postRequest } from "@/services/api"
+import {
+  Condition,
+  ApiResponse,
+  AdvancedCondition,
+} from "@/services/interfaces"
 
-function useGenerateReport(url: string) {
-  return useCustomMutation<
-    string,
-    Partial<GetPayload & { column_widths: number[] }>
-  >({
+interface GenerateReportPayload {
+  condition: AdvancedCondition[]
+  pk?: number
+  rp_name?: string
+}
+
+function useGenerateReport(app_level: "users" | "payroll" | "tasks") {
+  return useCustomMutation<string, GenerateReportPayload>({
     initialData: "",
     mutationKey: ["reports", "user-reports"],
-    mutationFn: async (payload) => {
+    mutationFn: async ({ condition, rp_name, pk }) => {
+      const params = `${rp_name ?? ""}/${pk ?? ""}`
       const {
         data: { data },
-      } = await postRequest<string>(url, payload)
+      } = await postRequest<string>(
+        `${app_level}${WEB_API_GENERATE_REPORT}${rp_name ? params : ""}`,
+        condition
+      )
 
       return data
     },

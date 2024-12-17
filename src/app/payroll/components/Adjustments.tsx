@@ -24,18 +24,17 @@ import { AdvancedCondition } from "@/services/interfaces"
 import { defaultBreakpoints } from "@/styles/breakpoints"
 import {
   DashOutlined,
-  DeleteOutlined,
+  StopOutlined,
   EditOutlined,
   FilterOutlined,
   PlusOutlined,
-  StopOutlined,
 } from "@ant-design/icons"
 import { ColumnType } from "antd/lib/table"
 import React, { useCallback, useEffect, useState } from "react"
 import AdjustmentForm from "./AdjustmentForm"
 import { Form } from "antd"
 import formatter from "@/helpers/formatter"
-import useCreateAdjustment from "@/services/hooks/payroll/useCreateAjustment"
+import useCreateAdjustment from "@/services/hooks/payroll/useCreateAdjustment"
 import errorHandler from "@/helpers/errorHandler"
 import { customNotification } from "@/components/custom/customNotification"
 import FilterTemplate from "@/components/FilterTemplate"
@@ -253,9 +252,9 @@ const AdjustmentTab: React.FC = () => {
       title: "Empleado",
     },
     {
-      key: "DESC_TYPE",
-      dataIndex: "DESC_TYPE",
-      title: "Tipo",
+      key: "DESC_CONCEPT",
+      dataIndex: "DESC_CONCEPT",
+      title: "Concepto",
     },
     {
       key: "AMOUNT",

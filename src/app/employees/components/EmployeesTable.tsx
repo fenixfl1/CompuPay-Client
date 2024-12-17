@@ -8,6 +8,7 @@ import {
   CustomForm,
   CustomFormItem,
   CustomInputNumber,
+  CustomMenu,
   CustomPopover,
   CustomRangePicker,
   CustomRow,
@@ -24,11 +25,12 @@ import { Roles, User } from "@/interfaces/user"
 import {
   DownOutlined,
   EditOutlined,
+  EllipsisOutlined,
   FilterOutlined,
   PrinterOutlined,
 } from "@ant-design/icons"
 import { ColumnType, TablePaginationConfig } from "antd/lib/table"
-import React, { useContext, useEffect, useRef, useState } from "react"
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react"
 import styled from "styled-components"
 import EmployeeForm from "./EmployeeForm"
 import { Metadata } from "@/services/interfaces"
@@ -39,7 +41,7 @@ import ConditionalComponent from "@/components/ConditionalComponent"
 import useIsAuthorized from "@/hooks/useIsAuthorized"
 import EditableRow, { EditableContext } from "@/components/EditableRow"
 import { Form, InputRef, TableProps } from "antd"
-import { CustomColumnType } from "@/interfaces/general"
+import { CustomColumnType, Options } from "@/interfaces/general"
 import useRolesStore from "@/stores/rolesStore"
 import { useChangeUserState } from "@/services/hooks/user/useChangeUserState"
 import errorHandler from "@/helpers/errorHandler"
@@ -54,6 +56,7 @@ import { PopoverContainer } from "@/components/custom/CustomPopover"
 import FilterTemplate from "@/components/FilterTemplate"
 import useUserStore from "@/stores/userStore"
 import useGetDepartmentList from "@/services/hooks/user/useGetDepartmentList"
+import jsonParse from "@/helpers/jsonParse"
 
 const Tag = styled(CustomTag)`
   min-width: 70px;
@@ -64,13 +67,12 @@ const optionStyles: React.CSSProperties = {
   width: "100%",
 }
 
-const statusOptions = Object.keys(states).map((key) => ({
-  label: states[key].label,
-  value: key,
-  style: optionStyles,
-}))
-
 const searchOptions = [
+  {
+    label: "Código",
+    value: "USER_ID",
+    style: optionStyles,
+  },
   {
     label: "Nombre",
     value: "NAME",
@@ -225,12 +227,24 @@ const EmployeesTable: React.FC<EmployeeTableProps> = ({
   const { mutateAsync: changeUserState, isPending } = useChangeUserState()
   const { mutate: getDepartments, data: departments } = useGetDepartmentList()
 
-  const allowEdit = useIsAuthorized(
-    Number(parameters?.ID_OPERACION_EDITAR_EMPLEADOS)
-  )
+  const {
+    ID_OPERACION_EDITAR_EMPLEADOS,
+    ID_OPERACION_CAMBIAR_ESTADO_EMPLEADOS,
+    LIST_ESTADOS_EMPLEADOS,
+  } = parameters
+
+  const allowEdit = useIsAuthorized(Number(ID_OPERACION_EDITAR_EMPLEADOS))
   const allowChangeState = useIsAuthorized(
-    Number(parameters?.ID_OPERACION_CAMBIAR_ESTADO_EMPLEADOS)
+    Number(ID_OPERACION_CAMBIAR_ESTADO_EMPLEADOS)
   )
+
+  const statOptions = useMemo(() => {
+    if (!LIST_ESTADOS_EMPLEADOS) return []
+
+    const arr = jsonParse<Options[]>(LIST_ESTADOS_EMPLEADOS)
+
+    return arr.map((item) => ({ ...item, style: optionStyles }))
+  }, [LIST_ESTADOS_EMPLEADOS])
 
   useEffect(() => {
     if (!visible) {
@@ -277,7 +291,7 @@ const EmployeesTable: React.FC<EmployeeTableProps> = ({
             name={"STATUS"}
             label={<CustomText strong>Estado</CustomText>}
           >
-            <CustomCheckboxGroup options={statusOptions} />
+            <CustomCheckboxGroup options={statOptions} />
           </CustomFormItem>
         </CustomCol>
         <CustomCol xs={24}>
@@ -355,6 +369,7 @@ const EmployeesTable: React.FC<EmployeeTableProps> = ({
             name={"SEARCH_OPTIONS"}
             label={<CustomText strong>Buscar por</CustomText>}
             labelCol={{ span: 24 }}
+            initialValue={["NAME", "LAST_NAME", "USER_ID"]}
           >
             <CustomSelect
               placeholder={"Seleccionar opciones"}
@@ -367,26 +382,18 @@ const EmployeesTable: React.FC<EmployeeTableProps> = ({
     </FilterTemplate>
   )
 
-  const getRecordIndex = (index: number) => {
-    if (metadata.page > 1) {
-      return metadata.page_size + index + 1
-    }
-
-    return index + 1
-  }
-
   const columns: CustomColumnType<User>[] = [
     {
-      key: "ROW_COUNT",
-      render: (v, r, index) => (
-        <CustomText type={"secondary"}>{getRecordIndex(index)}</CustomText>
-      ),
+      key: "USER_ID",
+      dataIndex: "USER_ID",
+      responsive: ["xl"],
     },
     {
       dataIndex: "AVATAR",
       key: "AVATAR",
       width: "3%",
       align: "center",
+      responsive: ["xl"],
       render: (value: string) => (
         <CustomAvatar
           style={{
@@ -405,6 +412,7 @@ const EmployeesTable: React.FC<EmployeeTableProps> = ({
       title: "Nombre",
       dataIndex: "NAME",
       key: "NAME",
+      responsive: ["xl"],
       render: (_, record) => (
         <CustomButton
           type={"link"}
@@ -422,32 +430,38 @@ const EmployeesTable: React.FC<EmployeeTableProps> = ({
       dataIndex: "USERNAME",
       key: "USERNAME",
       render: (value) => `@${value}`,
+      responsive: ["xl"],
     },
     {
       title: "Genero",
       dataIndex: "DESC_GENDER",
       key: "DESC_GENDER",
+      responsive: ["xl"],
     },
     {
       title: "Correo",
       dataIndex: "EMAIL",
       key: "EMAIL",
+      responsive: ["xl"],
     },
     {
       title: "Supervisor",
       dataIndex: "NAME_SUPERVISOR",
       key: "NAME_SUPERVISOR",
+      responsive: ["xl"],
       render: (value) => value ?? "N/A",
     },
     {
       key: "DESC_DEPARTMENT",
       dataIndex: "DESC_DEPARTMENT",
       title: "Departamento",
+      responsive: ["xl"],
     },
     {
       title: "Rol",
       dataIndex: "ROLES",
       key: "ROLES",
+      responsive: ["xl"],
       width: "8%",
       render: (roles: Roles[]) => (
         <CustomSpace size={1} wrap={false} direction="horizontal">
@@ -467,6 +481,7 @@ const EmployeesTable: React.FC<EmployeeTableProps> = ({
       title: "Estado",
       dataIndex: "STATE",
       key: "STATE",
+      responsive: ["xl"],
       editable: allowChangeState,
       options: Object.keys(states).map((key) => ({
         label: states[key].label,
@@ -475,8 +490,9 @@ const EmployeesTable: React.FC<EmployeeTableProps> = ({
       render: (value: string) => (
         <CustomSpace wrap={false} direction="horizontal" size={1}>
           <Tag color={states[value]?.color}>{states[value]?.label}</Tag>
-
-          <DownOutlined style={{ color: "#bfbfbf", fontSize: 10 }} />
+          <ConditionalComponent condition={allowChangeState}>
+            <DownOutlined style={{ color: "#bfbfbf", fontSize: 10 }} />
+          </ConditionalComponent>
         </CustomSpace>
       ),
     },
@@ -486,29 +502,49 @@ const EmployeesTable: React.FC<EmployeeTableProps> = ({
       width: "5%",
       align: "center",
       fixed: true,
+      hidden: !allowEdit,
       render: (_, record) => (
         <CustomSpace
           direction="horizontal"
           size={1}
           split={<CustomDivider type={"vertical"} />}
         >
-          <ConditionalComponent condition={allowEdit} visible>
+          <ConditionalComponent
+            condition={allowEdit}
+            visible
+            onClick={async () => {
+              await getUser({
+                condition: {
+                  USER_ID: record.USER_ID,
+                },
+              })
+              setVisible(true)
+            }}
+          >
             <CustomTooltip title={"Editar"}>
               <CustomButton
                 size={"large"}
                 type="link"
                 icon={<EditOutlined />}
-                onClick={async () => {
-                  await getUser({
-                    condition: {
-                      USER_ID: record.USER_ID,
-                    },
-                  })
-                  setVisible(true)
-                }}
               />
             </CustomTooltip>
           </ConditionalComponent>
+
+          <CustomTooltip title={"Más opciones"}>
+            <ConditionalComponent condition={allowEdit && false}>
+              <CustomPopover
+                showArrow
+                placement={"right"}
+                content={
+                  <CustomButton block type={"text"} target={"click"}>
+                    Finalizar Contrato
+                  </CustomButton>
+                }
+              >
+                <CustomButton type={"text"} icon={<EllipsisOutlined />} />
+              </CustomPopover>
+            </ConditionalComponent>
+          </CustomTooltip>
         </CustomSpace>
       ),
     },

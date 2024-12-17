@@ -27,6 +27,7 @@ import errorHandler from "@/helpers/errorHandler"
 import formatter from "@/helpers/formatter"
 import randomHexColorCode from "@/helpers/random-hex-color-code"
 import useDebounce from "@/hooks/useDebounce"
+import useIsAuthorized from "@/hooks/useIsAuthorized"
 import { EditConfig, WebSocketType } from "@/interfaces/general"
 import { Task } from "@/interfaces/task"
 import { User } from "@/interfaces/user"
@@ -37,11 +38,12 @@ import useUpdateTask from "@/services/hooks/tasks/useUpdateTask"
 import { useGetUserLIst } from "@/services/hooks/user/useGetUserList"
 import { AdvancedCondition } from "@/services/interfaces"
 import useTaskStore from "@/stores/taskStore"
+import useMenuOptionStore from "@/stores/useMenuOptionStore"
 import useUserStore from "@/stores/userStore"
 import { defaultBreakpoints } from "@/styles/breakpoints"
 import {
   ArrowDownOutlined,
-  DeleteOutlined,
+  StopOutlined,
   ExclamationCircleOutlined,
   PlusOutlined,
   WarningOutlined,
@@ -125,6 +127,9 @@ const TaskInfo: React.FC<TaskInfoProps> = ({ open, onClose }) => {
 
   const { task } = useTaskStore()
   const { users } = useUserStore()
+  const { parameters } = useMenuOptionStore<{
+    OPERATION_ID_UPDATE_TASKS: string
+  }>()
 
   assert<Required<Task>>(task)
 
@@ -132,6 +137,8 @@ const TaskInfo: React.FC<TaskInfoProps> = ({ open, onClose }) => {
   const { mutate: getTask } = useGetTask()
   const { mutateAsync: addOrRemoveUser } = useAddOrRemoveUserFromTask()
   const { mutateAsync: getUserList } = useGetUserLIst()
+
+  const allowUpdateTask = useIsAuthorized(parameters.OPERATION_ID_UPDATE_TASKS)
 
   const handleGetUsers = useCallback(() => {
     const condition: AdvancedCondition<User>[] = [
@@ -288,7 +295,7 @@ const TaskInfo: React.FC<TaskInfoProps> = ({ open, onClose }) => {
               <CustomTitle
                 level={4}
                 editable={
-                  task.STATE === "I"
+                  task.STATE === "I" || !allowUpdateTask
                     ? false
                     : {
                         ...editable,
@@ -365,7 +372,7 @@ const TaskInfo: React.FC<TaskInfoProps> = ({ open, onClose }) => {
               <CustomTooltip title={"Archivar Tarea"}>
                 <CustomButton
                   danger
-                  icon={<DeleteOutlined />}
+                  icon={<StopOutlined />}
                   onClick={handleOnDelete}
                   size={"large"}
                   type={"link"}

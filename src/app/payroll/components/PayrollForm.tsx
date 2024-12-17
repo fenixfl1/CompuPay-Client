@@ -124,9 +124,7 @@ const PayrollForm: React.FC<PayrollFormProps> = ({ onFinish }) => {
     assert<Dayjs[]>(FECHAS)
 
     try {
-      data.EMPLOYEES = data.EMPLOYEES ?? data.EMPLOYEE_SELECTION
-
-      delete data.EMPLOYEE_SELECTION
+      data.EMPLOYEES = "__all__"
 
       const message = await createPayroll({
         PERIOD_END: FECHAS[1]?.format("YYYY-MM-DD"),
@@ -167,8 +165,8 @@ const PayrollForm: React.FC<PayrollFormProps> = ({ onFinish }) => {
                 {...labelColFullWidth}
               >
                 <CustomRangePicker
-                // minDate={dateRange.minDate}
-                // maxDate={dateRange.maxDate}
+                  minDate={dateRange.minDate}
+                  maxDate={dateRange.maxDate}
                 />
               </CustomFormItem>
             </CustomCol>
@@ -220,48 +218,50 @@ const PayrollForm: React.FC<PayrollFormProps> = ({ onFinish }) => {
               </CustomFormItem>
             </CustomCol>
 
-            <CustomDivider>
-              <CustomText strong>Seleccionar empleados</CustomText>
-            </CustomDivider>
-            <CustomCol xs={24}>
-              <CustomFormItem
-                colon={false}
-                label={" "}
-                labelCol={{ span: 4 }}
-                name={"EMPLOYEE_SELECTION"}
-                required={false}
-                rules={[
-                  { required: true, message: "Debe seleccionar una opción" },
-                ]}
-              >
-                <CustomRadioGroup
-                  options={[
-                    { label: "Todos Los Empleados", value: "__all__" },
-                    { label: "Selección parcial", value: "P" },
-                  ]}
-                />
-              </CustomFormItem>
-            </CustomCol>
-            <ConditionalComponent condition={employeeSelection === "P"}>
+            <ConditionalComponent condition={false}>
+              <CustomDivider>
+                <CustomText strong>Seleccionar empleados</CustomText>
+              </CustomDivider>
               <CustomCol xs={24}>
-                <CustomDivider />
                 <CustomFormItem
                   colon={false}
                   label={" "}
                   labelCol={{ span: 4 }}
-                  layout={"horizontal"}
-                  name={"EMPLOYEES"}
+                  name={"EMPLOYEE_SELECTION"}
                   required={false}
                   rules={[
-                    {
-                      required: true,
-                      message: "Debe seleccionar por lo menos a un empleado",
-                    },
+                    { required: true, message: "Debe seleccionar una opción" },
                   ]}
                 >
-                  <CustomCheckboxGroup options={options} />
+                  <CustomRadioGroup
+                    options={[
+                      { label: "Todos Los Empleados", value: "__all__" },
+                      { label: "Selección parcial", value: "P" },
+                    ]}
+                  />
                 </CustomFormItem>
               </CustomCol>
+              <ConditionalComponent condition={employeeSelection === "P"}>
+                <CustomCol xs={24}>
+                  <CustomDivider />
+                  <CustomFormItem
+                    colon={false}
+                    label={" "}
+                    labelCol={{ span: 4 }}
+                    layout={"horizontal"}
+                    name={"EMPLOYEES"}
+                    required={false}
+                    rules={[
+                      {
+                        required: true,
+                        message: "Debe seleccionar por lo menos a un empleado",
+                      },
+                    ]}
+                  >
+                    <CustomCheckboxGroup options={options} />
+                  </CustomFormItem>
+                </CustomCol>
+              </ConditionalComponent>
             </ConditionalComponent>
           </CustomRow>
         </CustomForm>

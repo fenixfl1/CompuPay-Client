@@ -7,6 +7,7 @@ export interface EmployeesParameters {
   ID_OPERACION_CAMBIAR_ESTADO_EMPLEADOS: string
   USER_REPORT_COLUMNS_WIDTH: string
   USER_REPORT_COLUMNS: string
+  LIST_ESTADOS_EMPLEADOS: string
 }
 
 export interface TasksParameters {

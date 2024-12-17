@@ -22,7 +22,8 @@ import useGetLeave from "@/services/hooks/leaves/useGetLeave"
 import useLeaveStore from "@/stores/leaveStore"
 import useModalStore from "@/stores/modalStore"
 import {
-  DeleteOutlined,
+  CheckOutlined,
+  CloseOutlined,
   EditOutlined,
   FilterOutlined,
   StopOutlined,
@@ -51,7 +52,7 @@ const LeavesTable: React.FC<LeavesTableProps> = ({
   const { setVisible } = useModalStore()
 
   const {
-    token: { colorTextQuaternary },
+    token: { colorError, colorTextQuaternary },
   } = theme.useToken()
 
   const { mutateAsync: getLeave } = useGetLeave()
@@ -98,6 +99,18 @@ const LeavesTable: React.FC<LeavesTableProps> = ({
       key: "COMMENT",
     },
     {
+      title: "¿Pagado?",
+      dataIndex: "IS_PAID",
+      key: "IS_PAID",
+      align: "center",
+      render: (value) =>
+        value ? (
+          <CheckOutlined />
+        ) : (
+          <CloseOutlined style={{ color: colorError }} />
+        ),
+    },
+    {
       width: "5%",
       title: "Acciones",
       render: (_, record) => {
@@ -107,11 +120,14 @@ const LeavesTable: React.FC<LeavesTableProps> = ({
             direction={"horizontal"}
             split={<CustomDivider type={"vertical"} />}
           >
-            <CustomButton
-              onClick={() => handleOnEdit(record)}
-              type={"link"}
-              icon={<EditOutlined />}
-            />
+            <CustomTooltip title={"Editar"}>
+              <CustomButton
+                disabled={record.IS_PAID}
+                onClick={() => handleOnEdit(record)}
+                type={"link"}
+                icon={<EditOutlined />}
+              />
+            </CustomTooltip>
             <CustomTooltip title={isActive ? "Inhabilitar" : "Activar"}>
               <CustomPopConfirm
                 onConfirm={() => onUpdate(record)}
@@ -126,7 +142,7 @@ const LeavesTable: React.FC<LeavesTableProps> = ({
                   type={"link"}
                   icon={
                     isActive ? (
-                      <DeleteOutlined />
+                      <StopOutlined />
                     ) : (
                       <StopOutlined style={{ color: colorTextQuaternary }} />
                     )

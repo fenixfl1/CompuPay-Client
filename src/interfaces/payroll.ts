@@ -49,7 +49,7 @@ export interface Adjustment {
   CREATED_AT?: string
   CREATED_BY?: string
   DESCRIPTION: string
-  DESC_TYPE: string
+  DESC_CONCEPT: string
   PAYROLL: number
   PAYROLL_ENTRY_ID: number
   PAYROLL_ID: number

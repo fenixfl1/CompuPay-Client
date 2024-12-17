@@ -55,7 +55,7 @@ export const WEB_API_CREATE_OVERTIME = "time_management/create_overtime/"
 export const WEB_API_UPDATE_OVERTIME = "time_management/update_overtime/"
 export const WEB_API_GET_OVERTIME_LIST = "time_management/get_overtimes/"
 export const WEB_API_GET_OVERTIME = "time_management/get_overtime/"
-export const WEB_API_GET_USER_REPORT = "users/generate_report/"
+export const WEB_API_GENERATE_REPORT = "/generate_report/"
 
 // internal routes
 export const PATH_LOGIN = "/login"

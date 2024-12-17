@@ -44,7 +44,7 @@ import {
 } from "@/styles/breakpoints"
 import {
   BulbOutlined,
-  DeleteOutlined,
+  StopOutlined,
   FilePdfOutlined,
   FileWordOutlined,
 } from "@ant-design/icons"
@@ -344,7 +344,7 @@ const EmploymentData: React.FC<EmploymentDataProps> = ({ form }) => {
                           onClick={handleUpdateResume}
                           danger
                           type={"link"}
-                          icon={<DeleteOutlined />}
+                          icon={<StopOutlined />}
                         />
                       </CustomTooltip>
                     </CustomRow>
