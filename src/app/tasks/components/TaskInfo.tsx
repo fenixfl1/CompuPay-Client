@@ -250,7 +250,7 @@ const TaskInfo: React.FC<TaskInfoProps> = ({ open, onClose }) => {
       title: "Confirmación",
       content: "¿Seguro que desea archivar esta tarea?",
       onOk: async () => {
-        await handleUpdate("STATE", "A")
+        await handleUpdate("STATE", "I")
         onClose()
       },
     })

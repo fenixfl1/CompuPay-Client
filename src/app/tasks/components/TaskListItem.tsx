@@ -1,30 +1,20 @@
-import ConditionalComponent from "@/components/ConditionalComponent"
 import {
   CustomAvatar,
   CustomAvatarGroup,
-  CustomButton,
-  CustomCard,
   CustomCheckbox,
   CustomCol,
   CustomRow,
-  CustomSpace,
   CustomText,
   CustomTooltip,
 } from "@/components/custom"
 import { Task } from "@/interfaces/task"
-import {
-  BorderOutlined,
-  CheckSquareOutlined,
-  UserOutlined,
-} from "@ant-design/icons"
-import { CheckboxChangeEvent } from "antd/lib/checkbox"
+import { UserOutlined } from "@ant-design/icons"
 import React, { useEffect, useState } from "react"
 import styled from "styled-components"
 import formatter from "@/helpers/formatter"
 import capitalize from "@/helpers/capitalize"
 import { CustomLink } from "@/components/custom/CustomParagraph"
 import { LinkProps } from "antd/lib/typography/Link"
-import { defaultBreakpoints } from "@/styles/breakpoints"
 
 const Card = styled.div`
   width: 100%;
@@ -44,9 +34,12 @@ const Card = styled.div`
   }
 `
 
-const Title = styled(CustomLink)<LinkProps & { deleted: boolean }>`
+const Title = styled(CustomLink)<
+  LinkProps & { deleted: boolean; danger?: boolean }
+>`
   text-decoration: ${({ deleted }) =>
     deleted ? "line-through !important" : undefined};
+  color: ${({ danger }) => (danger ? "#ff4d4f" : undefined)};
 `
 
 interface TaskListItemProps {
@@ -89,6 +82,7 @@ const TaskListItem: React.FC<TaskListItemProps> = ({
                   <Title
                     onClick={() => onClick(task)}
                     deleted={task?.COMPLETED}
+                    danger={task.STATE === "I"}
                   >
                     {task?.NAME}
                   </Title>
