@@ -137,12 +137,6 @@ const EmploymentData: React.FC<EmploymentDataProps> = ({ form }) => {
           field: "STATE",
           operator: "=",
         },
-        {
-          condition: "A",
-          dataType: "str",
-          field: "rol_id__state",
-          operator: "=",
-        },
       ],
     })
   }, [])
