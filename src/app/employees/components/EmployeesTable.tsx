@@ -27,7 +27,7 @@ import {
   EditOutlined,
   EllipsisOutlined,
   FilterOutlined,
-  PrinterOutlined,
+  DownloadOutlined,
 } from "@ant-design/icons"
 import { ColumnType, TablePaginationConfig } from "antd/lib/table"
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react"
@@ -216,6 +216,7 @@ const EmployeesTable: React.FC<EmployeeTableProps> = ({
   const formValues = Form.useWatch([], form)
 
   const [filterCount, setFilterCount] = useState(0)
+  const [showExportOptions, setShowExportOptions] = useState(false)
 
   const { setOpenDrawer, open } = useDrawerStore()
   const { setVisible, visible } = useModalStore()
@@ -381,6 +382,20 @@ const EmployeesTable: React.FC<EmployeeTableProps> = ({
       </CustomSpace>
     </FilterTemplate>
   )
+
+  const toggleExportOptions = () => setShowExportOptions(!showExportOptions)
+
+  const columnsMap = {
+    USER_ID: "ID",
+    NAME: "Nombre",
+    USERNAME: "Usuario",
+    DESC_GENDER: "Genero",
+    EMAIL: "Correo",
+    NAME_SUPERVISOR: "Supervisor",
+    DESC_DEPARTMENT: "Departamento",
+    ROLES: "Roles",
+    STATE: "Estado",
+  }
 
   const columns: CustomColumnType<User>[] = [
     {
@@ -603,10 +618,12 @@ const EmployeesTable: React.FC<EmployeeTableProps> = ({
                 <CustomTooltip title={"Generar Reporte"}>
                   <CustomButton
                     size={"large"}
-                    icon={<PrinterOutlined />}
+                    icon={<DownloadOutlined />}
                     type={"text"}
-                    onClick={onPrint}
-                  />
+                    onClick={toggleExportOptions}
+                  >
+                    Exportar Tabla
+                  </CustomButton>
                 </CustomTooltip>
               </CustomRow>
             </CustomCol>
@@ -631,6 +648,17 @@ const EmployeesTable: React.FC<EmployeeTableProps> = ({
                   total: metadata?.total,
                   current: metadata?.page,
                   showSizeChanger: true,
+                }}
+                exportable={{
+                  open: showExportOptions,
+                  onClose: toggleExportOptions,
+                  columnsMap,
+                  getData: dataSource.map((item) => {
+                    return {
+                      ...item,
+                      ROLES: item.ROLES.map((rol) => rol.NAME).join(", "),
+                    }
+                  }),
                 }}
               />
             </CustomCol>

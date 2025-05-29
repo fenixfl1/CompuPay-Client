@@ -1,6 +1,7 @@
 {
     "cSpell.words": [
         "AUTOPAY",
+        "autotable",
         "cedula",
         "chartjs",
         "cssinjs",
@@ -10,8 +11,10 @@
         "dayjs",
         "ILIKE",
         "nextjs",
+        "officedocument",
         "offtime",
         "ontime",
+        "openxmlformats",
         "payflow",
         "Popconfirm",
         "popover",

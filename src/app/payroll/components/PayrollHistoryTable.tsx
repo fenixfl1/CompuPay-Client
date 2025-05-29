@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from "react"
+import React, { useCallback, useEffect, useState } from "react"
 import type { TableColumnsType } from "antd"
 import {
   PaymentDetail,
@@ -33,6 +33,7 @@ const currencyFormatter = (value: string, record: PayrollEntry) =>
   })
 
 const PayrollHistoryTable: React.FC = () => {
+  const [showExportOptions, setShowExportOptions] = useState(false)
   const {
     mutateAsync: getPayrollHistory,
     isPending: isGetPending,
@@ -141,20 +142,6 @@ const PayrollHistoryTable: React.FC = () => {
         width: "10%",
         align: "center",
       },
-      {
-        title: "Acciones",
-        key: " ACTIONS",
-        width: "5%",
-        render: () => (
-          <CustomTooltip title={"Generar Reporte"}>
-            <CustomButton
-              size={"large"}
-              icon={<PrinterOutlined />}
-              type={"text"}
-            />
-          </CustomTooltip>
-        ),
-      },
     ]
 
     const paymentDetails = (
@@ -193,6 +180,11 @@ const PayrollHistoryTable: React.FC = () => {
         }}
         pagination={false}
         rowKey={(record) => record.PAYROLL_ENTRY_ID}
+        exportable={{
+          open: showExportOptions,
+          onClose: () => setShowExportOptions(false),
+          columnsMap,
+        }}
       />
     )
   }
@@ -260,11 +252,27 @@ const PayrollHistoryTable: React.FC = () => {
             size={"large"}
             icon={<PrinterOutlined />}
             type={"text"}
+            onClick={() => setShowExportOptions(true)}
           />
         </CustomTooltip>
       ),
     },
   ]
+
+  const columnsMap: Record<string, string> = {
+    FULL_NAME: "Nombre",
+    SALARY: "Salario",
+    OVERTIMES: "Horas Extras",
+    BONUS: "Bonos",
+    VACATIONS: "Vacaciones",
+    DISCOUNT: "Descuentos",
+    OTHER_DISCOUNT: "Otros Descuentos",
+    AFP: "AFP",
+    SFS: "SFS",
+    ISR: "ISR",
+    NET_SALARY: "Salario Neto",
+    DESC_STATUS: "Estado",
+  }
 
   return (
     <CustomSpin spinning={isGetPending}>
@@ -272,8 +280,8 @@ const PayrollHistoryTable: React.FC = () => {
         size={"large"}
         columns={columns}
         dataSource={data}
-        expandable={{ expandedRowRender }}
         rowKey={(record) => record.PAYROLL_ID}
+        expandable={{ expandedRowRender }}
       />
     </CustomSpin>
   )

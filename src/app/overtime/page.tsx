@@ -29,7 +29,7 @@ const page: React.FC = () => {
     useUpdateOvertime()
 
   const { visible } = useModalStore()
-  const { metadata } = useOvertimeStore()
+  const { metadata, setOvertime } = useOvertimeStore()
 
   const handleOnSearch = useCallback(
     (
@@ -82,6 +82,10 @@ const page: React.FC = () => {
   )
 
   useEffect(handleOnSearch, [handleOnSearch])
+
+  useEffect(() => {
+    setOvertime({} as Overtime)
+  }, [shouldUpdate])
 
   const handleOnUpdate = async (record: Overtime) => {
     try {

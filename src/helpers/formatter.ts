@@ -16,7 +16,11 @@ function formatter(props: Formatter) {
       return originalValue.replace(/(\d{3})(\d{3})(\d{4})/, "($1) $2-$3")
     }
     if (format === "document") {
-      return originalValue.replace(/(\d{3})(\d{7})(\d{1})/, "$1-$2-$3")
+      if (value.length === 11) {
+        return originalValue.replace(/(\d{3})(\d{7})(\d{1})/, "$1-$2-$3")
+      } else {
+        return originalValue.replace(/(\d)(\d{2})(\d{5})(\d)/, "$1-$2-$3-$4")
+      }
     }
     if (format === "currency") {
       const fixedValue = parseFloat(value).toFixed(fix)

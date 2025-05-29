@@ -25,13 +25,14 @@ import useOvertimeStore from "@/stores/overtimes"
 import {
   CheckOutlined,
   CloseOutlined,
+  DownloadOutlined,
   EditOutlined,
   FilterOutlined,
   StopOutlined,
 } from "@ant-design/icons"
 import { Form, theme } from "antd"
 import { ColumnType } from "antd/lib/table"
-import React from "react"
+import React, { useState } from "react"
 
 interface OvertimeTableProps {
   searchKey: (value: string) => void
@@ -56,6 +57,8 @@ const OvertimeTable: React.FC<OvertimeTableProps> = ({
   const { mutateAsync: getOvertime } = useGetOvertime()
   const { overtimeList, metadata } = useOvertimeStore()
   const { setVisible } = useModalStore()
+
+  const [showExportOptions, setShowExportOptions] = useState(false)
 
   const handleOnEdit = async (record: Overtime) => {
     try {
@@ -158,6 +161,18 @@ const OvertimeTable: React.FC<OvertimeTableProps> = ({
     },
   ]
 
+  const toggleExportOptions = () => setShowExportOptions(!showExportOptions)
+
+  const columnsMap = {
+    OVERTIME_ID: "ID",
+    EMPLOYEE: "Usuario",
+    DATE: "Fecha",
+    TIME: "Horas",
+    RATE: "Costo Por horas",
+    TOTAL: "Total",
+    PAID: "Pagado",
+  }
+
   const content = (
     <FilterTemplate
       form={form}
@@ -208,15 +223,27 @@ const OvertimeTable: React.FC<OvertimeTableProps> = ({
   const title = () => (
     <CustomCol xs={24}>
       <CustomRow justify={"space-between"}>
-        <CustomTooltip title={"Filtros"}>
-          <CustomPopover title={"Filtros"} content={content}>
+        <CustomRow justify={"space-between"}>
+          <CustomTooltip title={"Filtros"}>
+            <CustomPopover title={"Filtros"} content={content}>
+              <CustomButton
+                size={"large"}
+                type={"text"}
+                icon={<FilterOutlined />}
+              />
+            </CustomPopover>
+          </CustomTooltip>
+          <CustomTooltip title={"Generar Reporte"}>
             <CustomButton
               size={"large"}
+              icon={<DownloadOutlined />}
               type={"text"}
-              icon={<FilterOutlined />}
-            />
-          </CustomPopover>
-        </CustomTooltip>
+              onClick={toggleExportOptions}
+            >
+              Exportar Tabla
+            </CustomButton>
+          </CustomTooltip>
+        </CustomRow>
 
         <CustomCol xs={24} md={18} lg={10}>
           <CustomSearch
@@ -237,6 +264,17 @@ const OvertimeTable: React.FC<OvertimeTableProps> = ({
           dataSource={overtimeList}
           pagination={makePagination(metadata)}
           onChange={({ pageSize, current }) => onSearch(current, pageSize)}
+          exportable={{
+            open: showExportOptions,
+            onClose: toggleExportOptions,
+            columnsMap,
+            getData: overtimeList.map((item) => {
+              return {
+                ...item,
+                PAID: item.PAID ? "Sí" : "No",
+              }
+            }),
+          }}
         />
       </CustomCol>
     </CustomRow>

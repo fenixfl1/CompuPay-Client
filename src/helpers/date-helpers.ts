@@ -53,3 +53,44 @@ export const getTime = (time: dayjs.Dayjs) => {
 export const toDayjs = (date: string, format = DATE_FORMAT) => {
   return dayjs(date, format)
 }
+
+/**
+ * Checks if a given value is a valid date string.
+ * Supports ISO format, YYYY-MM-DD, and DD/MM/YYYY.
+ * @param {unknown} value The value to check.
+ * @returns {boolean} True if valid date, false otherwise.
+ */
+export function isValidDate(value: unknown): boolean {
+  if (typeof value !== "string") return false
+
+  const isoDate = new Date(value)
+  if (!isNaN(isoDate.getTime()) && value === isoDate.toISOString()) {
+    return true // valid full ISO string
+  }
+
+  // Match YYYY-MM-DD
+  const ymdRegex = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/
+  if (ymdRegex.test(value)) {
+    const [year, month, day] = value.split("-").map(Number)
+    const date = new Date(`${year}-${month}-${day}`)
+    return (
+      date.getFullYear() === year &&
+      date.getMonth() + 1 === month &&
+      date.getDate() === day
+    )
+  }
+
+  // Match DD/MM/YYYY
+  const dmyRegex = /^(0[1-9]|[12]\d|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/
+  if (dmyRegex.test(value)) {
+    const [day, month, year] = value.split("/").map(Number)
+    const date = new Date(`${year}-${month}-${day}`)
+    return (
+      date.getFullYear() === year &&
+      date.getMonth() + 1 === month &&
+      date.getDate() === day
+    )
+  }
+
+  return false
+}

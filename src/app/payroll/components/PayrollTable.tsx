@@ -32,6 +32,8 @@ import {
   FilterOutlined,
   StopOutlined,
   PrinterOutlined,
+  DownOutlined,
+  DownloadOutlined,
 } from "@ant-design/icons"
 import errorHandler from "@/helpers/errorHandler"
 import useUpdatePayrollEntry from "@/services/hooks/payroll/useUpdatePayrollEntry"
@@ -111,6 +113,7 @@ const PayrollTable: React.FC<PayrollTableProps> = ({ payrollId }) => {
 
   const socket = useWebSocket()
 
+  const [showExportOptions, setShowExportOptions] = useState(false)
   const [condition, setCondition] = useState<AdvancedCondition[]>([])
   const [searchValue, setSearchValue] = useState("")
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
@@ -253,6 +256,8 @@ const PayrollTable: React.FC<PayrollTableProps> = ({ payrollId }) => {
     }
   }
 
+  const toggleExportOptions = () => setShowExportOptions(!showExportOptions)
+
   const handleActions = async () => {
     const data = await form.validateFields()
     const actionLabel = actions.find(
@@ -322,19 +327,6 @@ const PayrollTable: React.FC<PayrollTableProps> = ({ payrollId }) => {
         }
       },
     })
-  }
-
-  const handleOnGenerateReporte = async () => {
-    try {
-      const response = await generateReport({
-        condition,
-        rp_name: "current_payroll",
-      })
-
-      openReport(response, "Reporte de nómina")
-    } catch (error) {
-      errorHandler(error)
-    }
   }
 
   const currencyFormatter = (value: string, record: PayrollEntry) =>
@@ -641,10 +633,12 @@ const PayrollTable: React.FC<PayrollTableProps> = ({ payrollId }) => {
             <CustomTooltip title={"Generar Reporte"}>
               <CustomButton
                 size={"large"}
-                icon={<PrinterOutlined />}
+                icon={<DownloadOutlined />}
                 type={"text"}
-                onClick={handleOnGenerateReporte}
-              />
+                onClick={toggleExportOptions}
+              >
+                Exportar Tabla
+              </CustomButton>
             </CustomTooltip>
           </CustomRow>
         </CustomCol>
@@ -692,6 +686,21 @@ const PayrollTable: React.FC<PayrollTableProps> = ({ payrollId }) => {
     </CustomForm>
   )
 
+  const columnsMap: Record<string, string> = {
+    FULL_NAME: "Nombre",
+    SALARY: "Salario",
+    OVERTIMES: "Horas Extras",
+    BONUS: "Bonos",
+    VACATIONS: "Vacaciones",
+    DISCOUNT: "Descuentos",
+    OTHER_DISCOUNT: "Otros Descuentos",
+    AFP: "AFP",
+    SFS: "SFS",
+    ISR: "ISR",
+    NET_SALARY: "Salario Neto",
+    DESC_STATUS: "Estado",
+  }
+
   const rowSelection: TableRowSelection<PayrollEntry> = {
     type: "checkbox",
     selectedRowKeys,
@@ -716,6 +725,11 @@ const PayrollTable: React.FC<PayrollTableProps> = ({ payrollId }) => {
             dataSource={entries}
             columns={column}
             rowKey={(record) => record.PAYROLL_ENTRY_ID}
+            exportable={{
+              open: showExportOptions,
+              onClose: toggleExportOptions,
+              columnsMap,
+            }}
             rowClassName={(record) =>
               record.STATUS ? "payroll-processed" : ""
             }

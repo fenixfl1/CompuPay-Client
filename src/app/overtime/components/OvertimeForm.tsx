@@ -136,7 +136,7 @@ const OvertimeForm: React.FC = () => {
           <CustomRow justify={"start"}>
             <CustomCol xs={24}>
               <CustomFormItem
-                label={"Empleado"}
+                label={"Empleado..."}
                 name={"EMPLOYEE"}
                 rules={[{ required: true }]}
                 {...labelColFullWidth}

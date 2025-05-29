@@ -54,6 +54,7 @@ import MotionComponent from "@/components/MotionComponent"
 import Notifications from "@/components/Notifications"
 import SVGReader from "@/components/SVGReader"
 import jsonParse from "@/helpers/jsonParse"
+import { useGetBusinessInfo } from "@/services/hooks/user/useGetBusinessInfo"
 
 const LogoContainer = styled.div`
   height: 75px;
@@ -152,6 +153,8 @@ const Template: React.FC<React.PropsWithChildren> = ({ children }) => {
   const [isPending] = useTransition()
   const { setOpenDrawer, open } = useDrawerStore()
   const { setVisible } = useModalStore()
+
+  useGetBusinessInfo()
 
   const [isDarkMode, setIsDarkMode] = useState(getDarkMode())
 

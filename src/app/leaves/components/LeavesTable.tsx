@@ -24,13 +24,14 @@ import useModalStore from "@/stores/modalStore"
 import {
   CheckOutlined,
   CloseOutlined,
+  DownloadOutlined,
   EditOutlined,
   FilterOutlined,
   StopOutlined,
 } from "@ant-design/icons"
 import { Form, theme } from "antd"
 import { ColumnType } from "antd/lib/table"
-import React from "react"
+import React, { useState } from "react"
 
 interface LeavesTableProps {
   searchKey: (value: string) => void
@@ -48,6 +49,9 @@ const LeavesTable: React.FC<LeavesTableProps> = ({
   onUpdate,
 }) => {
   const [form] = Form.useForm()
+
+  const [showExportOptions, setShowExportOptions] = useState(false)
+
   const { leaves, metadata } = useLeaveStore()
   const { setVisible } = useModalStore()
 
@@ -100,11 +104,11 @@ const LeavesTable: React.FC<LeavesTableProps> = ({
     },
     {
       title: "¿Pagado?",
-      dataIndex: "IS_PAID",
-      key: "IS_PAID",
+      dataIndex: "ESTADO",
+      key: "ESTADO",
       align: "center",
-      render: (value) =>
-        value ? (
+      render: (state: string) =>
+        state === "D" ? (
           <CheckOutlined />
         ) : (
           <CloseOutlined style={{ color: colorError }} />
@@ -122,7 +126,7 @@ const LeavesTable: React.FC<LeavesTableProps> = ({
           >
             <CustomTooltip title={"Editar"}>
               <CustomButton
-                disabled={record.IS_PAID}
+                disabled={record.STATE !== "A"}
                 onClick={() => handleOnEdit(record)}
                 type={"link"}
                 icon={<EditOutlined />}
@@ -155,6 +159,18 @@ const LeavesTable: React.FC<LeavesTableProps> = ({
       },
     },
   ]
+
+  const toggleExportOptions = () => setShowExportOptions(!showExportOptions)
+
+  const columnsMap = {
+    LEAVE_ID: "ID",
+    EMPLOYEE: "Empleado",
+    DESC_CONCEPT: "Concepto",
+    DAYS: "Cant. Dias",
+    DATE_RANGE: "Fecha",
+    COMMENT: "Comentario",
+    IS_PAID: "Pagado",
+  }
 
   const content = (
     <FilterTemplate
@@ -213,15 +229,27 @@ const LeavesTable: React.FC<LeavesTableProps> = ({
   const title = () => (
     <CustomCol xs={24}>
       <CustomRow justify={"space-between"}>
-        <CustomTooltip title={"Filtros"}>
-          <CustomPopover title={"Filtros"} content={content}>
+        <CustomRow justify={"space-between"}>
+          <CustomTooltip title={"Filtros"}>
+            <CustomPopover title={"Filtros"} content={content}>
+              <CustomButton
+                size={"large"}
+                type={"text"}
+                icon={<FilterOutlined />}
+              />
+            </CustomPopover>
+          </CustomTooltip>
+          <CustomTooltip title={"Generar Reporte"}>
             <CustomButton
               size={"large"}
+              icon={<DownloadOutlined />}
               type={"text"}
-              icon={<FilterOutlined />}
-            />
-          </CustomPopover>
-        </CustomTooltip>
+              onClick={toggleExportOptions}
+            >
+              Exportar Tabla
+            </CustomButton>
+          </CustomTooltip>
+        </CustomRow>
 
         <CustomCol xs={24} md={18} lg={10}>
           <CustomSearch
@@ -242,6 +270,17 @@ const LeavesTable: React.FC<LeavesTableProps> = ({
           dataSource={leaves}
           pagination={makePagination(metadata)}
           onChange={({ pageSize, current }) => onSearch(current, pageSize)}
+          exportable={{
+            open: showExportOptions,
+            onClose: toggleExportOptions,
+            columnsMap,
+            getData: leaves.map((item) => {
+              return {
+                ...item,
+                IS_PAID: item.IS_PAID ? "Sí" : "No",
+              }
+            }),
+          }}
         />
       </CustomCol>
     </CustomRow>

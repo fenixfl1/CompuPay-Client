@@ -4,6 +4,7 @@ interface SessionPayload {
   FULL_NAME: string
   ROLES: string[]
   AVATAR: string
+  BUSINESS_ID: number
   SESSION_COOKIE: {
     token: string
     expires: string
@@ -13,6 +14,15 @@ interface SessionPayload {
 interface LoginPayload {
   username: string
   password: string
+}
+
+export interface Business {
+  BUSINESS_ID: number
+  NAME: string
+  RNC: string
+  LOGO: string
+  PHONE: string
+  ADDRESS: string
 }
 
 interface Roles {

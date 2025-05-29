@@ -125,11 +125,13 @@ const PayrollDistributionChart: React.FC = () => {
               <CustomCheckboxGroup
                 onChange={setSelectedConcepts}
                 value={selectedConcepts}
-                options={response?.concepts?.map((item) => ({
-                  label: item.concept,
-                  value: item.concept,
-                  style: { width: "100%" },
-                }))}
+                options={response?.concepts
+                  ?.filter((item) => !!item.concept)
+                  ?.map((item) => ({
+                    label: item?.concept,
+                    value: item?.concept,
+                    style: { width: "100%" },
+                  }))}
               />
             </CustomFormItem>
           </CustomCol>
