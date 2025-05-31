@@ -5,6 +5,7 @@ import { TableProps } from "antd/lib/table"
 import { defaultTheme } from "@/styles/themes"
 import ExportOptions from "../ExportOptions"
 import ConditionalComponent from "../ConditionalComponent"
+import { Metadata } from "@/services/interfaces"
 
 export interface CustomColumnType<T> extends ColumnType<T> {
   editable?: boolean
@@ -21,6 +22,7 @@ interface ExportableProps {
 
 export interface CustomTableProps<T> extends TableProps<T> {
   exportable?: ExportableProps
+  metadata?: Metadata
 }
 
 const CustomTable = React.forwardRef<any, CustomTableProps<any>>(
@@ -31,6 +33,7 @@ const CustomTable = React.forwardRef<any, CustomTableProps<any>>(
       bordered = false,
       size = defaultTheme.size,
       exportable,
+      metadata,
       ...props
     },
     ref
@@ -51,9 +54,11 @@ const CustomTable = React.forwardRef<any, CustomTableProps<any>>(
           ref={ref}
           expandable={{ indentSize: 25, ...expandable }}
           pagination={{
-            ...props.pagination,
             showSizeChanger: true,
-            pageSizeOptions: [5, 10, 15, 20, 25, 50, 100, 200],
+            pageSizeOptions: [5, 10, 15, 20, 25, 50, 75, 100, 200],
+            pageSize: metadata?.page_size,
+            current: metadata?.page,
+            total: metadata?.total,
           }}
           {...props}
         />

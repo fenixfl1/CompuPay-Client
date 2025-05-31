@@ -697,7 +697,7 @@ const PayrollTable: React.FC<PayrollTableProps> = ({ payrollId }) => {
     AFP: "AFP",
     SFS: "SFS",
     ISR: "ISR",
-    NET_SALARY: "Salario Neto",
+    // NET_SALARY: "Salario Neto",
     DESC_STATUS: "Estado",
   }
 
@@ -733,7 +733,6 @@ const PayrollTable: React.FC<PayrollTableProps> = ({ payrollId }) => {
             rowClassName={(record) =>
               record.STATUS ? "payroll-processed" : ""
             }
-            pagination={makePagination(metadata)}
             onChange={({ pageSize, current }) =>
               handleOnSearch(current, pageSize)
             }

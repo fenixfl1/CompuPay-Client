@@ -79,7 +79,6 @@ const OvertimeTable: React.FC<OvertimeTableProps> = ({
       title: "Empleado",
       dataIndex: "EMPLOYEE",
       key: "EMPLOYEE",
-      render: (value) => `@${value}`,
     },
     {
       title: "Fecha",
@@ -165,7 +164,7 @@ const OvertimeTable: React.FC<OvertimeTableProps> = ({
 
   const columnsMap = {
     OVERTIME_ID: "ID",
-    EMPLOYEE: "Usuario",
+    EMPLOYEE: "Empleado",
     DATE: "Fecha",
     TIME: "Horas",
     RATE: "Costo Por horas",

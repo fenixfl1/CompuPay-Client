@@ -80,7 +80,6 @@ const LeavesTable: React.FC<LeavesTableProps> = ({
       title: "Empleado",
       dataIndex: "EMPLOYEE",
       key: "EMPLOYEE",
-      render: (value) => `@${value}`,
     },
     {
       title: "Razón",
