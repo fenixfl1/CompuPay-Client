@@ -260,13 +260,6 @@ const TaskList: React.FC = () => {
                         />
                       </CustomPopover>
                     </CustomTooltip>
-                    <CustomTooltip title={"Generar Reporte"}>
-                      <CustomButton
-                        size={"large"}
-                        icon={<PrinterOutlined />}
-                        type={"text"}
-                      />
-                    </CustomTooltip>
                   </CustomSpace>
                 </CustomCol>
                 <CustomCol xs={24} lg={12} xl={8}>

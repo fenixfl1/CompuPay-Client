@@ -168,7 +168,7 @@ const LeavesTable: React.FC<LeavesTableProps> = ({
     DAYS: "Cant. Dias",
     DATE_RANGE: "Fecha",
     COMMENT: "Comentario",
-    IS_PAID: "Pagado",
+    STATE: "Pagado",
   }
 
   const content = (
@@ -276,7 +276,7 @@ const LeavesTable: React.FC<LeavesTableProps> = ({
             getData: leaves.map((item) => {
               return {
                 ...item,
-                IS_PAID: item.IS_PAID ? "Sí" : "No",
+                STATE: item.STATE === "D" ? "Sí" : "No",
               }
             }),
           }}

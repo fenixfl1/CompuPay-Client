@@ -24,7 +24,7 @@ import useGetPayrollEntries from "@/services/hooks/payroll/useGetPayrollEntries"
 import { AdvancedCondition } from "@/services/interfaces"
 import usePayrollStore from "@/stores/payrollStore"
 import { ColumnType } from "antd/lib/table"
-import React, { useCallback, useEffect, useState } from "react"
+import React, { useCallback, useEffect, useMemo, useState } from "react"
 import CustomAvatar from "../../../components/custom/CustomAvatar"
 import randomHexColorCode from "@/helpers/random-hex-color-code"
 import {
@@ -142,6 +142,30 @@ const PayrollTable: React.FC<PayrollTableProps> = ({ payrollId }) => {
 
   const showWithholding =
     payrollInfo.CURRENT_PERIOD === payrollInfo?.PAYROLL_CONFIG?.PERIODS
+
+  const dataSource = useMemo(() => {
+    return entries.map((record) => {
+      const withholdingValue = showWithholding
+        ? record.AFP + record.SFS + record.ISR
+        : 0
+
+      const overtime = payrollInfo.INCLUDES_OVERTIME ? record.OVERTIMES : 0
+      const other_discount = payrollInfo.INCLUDES_LEAVES
+        ? record.OTHER_DISCOUNT
+        : 0
+      const vacations = payrollInfo.INCLUDES_LEAVES ? record.VACATIONS : 0
+
+      const salary =
+        record.SALARY / payrollInfo.PAYROLL_CONFIG.PERIODS +
+        overtime +
+        vacations +
+        record.BONUS -
+        record.DISCOUNT -
+        other_discount -
+        withholdingValue
+      return { ...record, NET_SALARY: salary }
+    })
+  }, [entries])
 
   const handleOnSearch = useCallback(
     (page = metadata?.page, size = metadata?.page_size) => {
@@ -434,36 +458,16 @@ const PayrollTable: React.FC<PayrollTableProps> = ({ payrollId }) => {
           <span>Neto del periodo</span>
         </CustomTooltip>
       ),
-      render: (_, record) => {
-        const withholdingValue = showWithholding
-          ? record.AFP + record.SFS + record.ISR
-          : 0
-
-        const overtime = payrollInfo.INCLUDES_OVERTIME ? record.OVERTIMES : 0
-        const other_discount = payrollInfo.INCLUDES_LEAVES
-          ? record.OTHER_DISCOUNT
-          : 0
-        const vacations = payrollInfo.INCLUDES_LEAVES ? record.VACATIONS : 0
-
-        const salary =
-          record.SALARY / payrollInfo.PAYROLL_CONFIG.PERIODS +
-          overtime +
-          vacations +
-          record.BONUS -
-          record.DISCOUNT -
-          other_discount -
-          withholdingValue
-        return (
-          <span>
-            {formatter({
-              value: salary,
-              format: "currency",
-              prefix: record.CURRENCY,
-              fix: 2,
-            })}
-          </span>
-        )
-      },
+      render: (value: number, record) => (
+        <span>
+          {formatter({
+            value,
+            format: "currency",
+            prefix: record.CURRENCY,
+            fix: 2,
+          })}
+        </span>
+      ),
     },
     {
       key: "DESC_STATUS",
@@ -697,7 +701,7 @@ const PayrollTable: React.FC<PayrollTableProps> = ({ payrollId }) => {
     AFP: "AFP",
     SFS: "SFS",
     ISR: "ISR",
-    // NET_SALARY: "Salario Neto",
+    NET_SALARY: "Salario Neto",
     DESC_STATUS: "Estado",
   }
 
@@ -722,7 +726,7 @@ const PayrollTable: React.FC<PayrollTableProps> = ({ payrollId }) => {
             rowSelection={allowProcess ? rowSelection : undefined}
             footer={allowProcess ? footer : undefined}
             title={tableTitle}
-            dataSource={entries}
+            dataSource={dataSource}
             columns={column}
             rowKey={(record) => record.PAYROLL_ENTRY_ID}
             exportable={{
