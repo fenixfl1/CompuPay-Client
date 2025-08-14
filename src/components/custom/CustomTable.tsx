@@ -55,7 +55,7 @@ const CustomTable = React.forwardRef<any, CustomTableProps<any>>(
           expandable={{ indentSize: 25, ...expandable }}
           pagination={{
             showSizeChanger: true,
-            pageSizeOptions: [5, 10, 15, 20, 25, 50, 75, 100, 200],
+            pageSizeOptions: [15, 20, 25, 50, 75, 100, 200],
             pageSize: metadata?.page_size,
             current: metadata?.page,
             total: metadata?.total,

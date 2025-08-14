@@ -177,7 +177,7 @@ export async function exportToPDF<T = any>({
     )
   )
 
-  const footerText = `Reporte generado por: ${getSessionInfo().FULL_NAME}`
+  const footerText = `Reporte generado por: ${getSessionInfo().FULL_NAME}. ${moment().format("h:mm:ss A")}`
 
   autoTable(doc, {
     head: [headers as string[]],

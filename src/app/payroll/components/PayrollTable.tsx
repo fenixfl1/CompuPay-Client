@@ -50,8 +50,6 @@ import useIsAuthorized from "@/hooks/useIsAuthorized"
 import ConditionalComponent from "@/components/ConditionalComponent"
 import { useWebSocket } from "@/context/web-socket"
 import moment from "moment"
-import useGenerateReport from "@/services/hooks/reports/useGenerateReport"
-import { openReport } from "@/helpers/open-report"
 
 const optionStyles: React.CSSProperties = {
   width: "100%",
@@ -131,8 +129,6 @@ const PayrollTable: React.FC<PayrollTableProps> = ({ payrollId }) => {
     mutateAsync: processPartialPayroll,
     isPending: isProcessPartialPending,
   } = useProcessPartialPayroll()
-  const { mutateAsync: generateReport, isPending: isGenerateReportPending } =
-    useGenerateReport("payroll")
 
   const { OPERATION_ID_PROCESS_PAYROLL, OPERATION_ID_REMOVE_PAYROLL_ENTRY } =
     parameters
@@ -727,6 +723,7 @@ const PayrollTable: React.FC<PayrollTableProps> = ({ payrollId }) => {
             footer={allowProcess ? footer : undefined}
             title={tableTitle}
             dataSource={dataSource}
+            metadata={metadata}
             columns={column}
             rowKey={(record) => record.PAYROLL_ENTRY_ID}
             exportable={{
