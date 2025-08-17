@@ -112,28 +112,16 @@ const PayrollHistoryTable: React.FC = () => {
         key: "NET_SALARY",
         dataIndex: "NET_SALARY",
         title: "Total entregado",
-        render: (_, values) => {
-          if (record.STATUS === "P") return <CustomRow>....</CustomRow>
-          const withholdingValue = showWithholding
-            ? values.AFP + values.SFS + values.ISR
-            : 0
-
-          const salary =
-            values.SALARY / payrollInfo.PAYROLL_CONFIG.PERIODS +
-            values.BONUS -
-            values.DISCOUNT -
-            withholdingValue
-          return (
-            <span>
-              {formatter({
-                value: salary,
-                format: "currency",
-                prefix: values.CURRENCY,
-                fix: 2,
-              })}
-            </span>
-          )
-        },
+        render: (value: number, record) => (
+          <span>
+            {formatter({
+              value,
+              format: "currency",
+              prefix: record.CURRENCY,
+              fix: 2,
+            })}
+          </span>
+        ),
       },
       {
         key: "DESC_STATUS",

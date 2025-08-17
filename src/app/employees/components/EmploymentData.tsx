@@ -206,7 +206,7 @@ const EmploymentData: React.FC<EmploymentDataProps> = ({ form }) => {
           <CustomCol {...defaultBreakpoints}>
             <CustomFormItem
               label={"Rol"}
-              name={"ROLES"}
+              name={"ROLE"}
               rules={[{ required: true }]}
             >
               <CustomSelect

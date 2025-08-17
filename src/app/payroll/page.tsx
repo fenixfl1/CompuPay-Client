@@ -5,9 +5,11 @@ import {
   CustomCollapse,
   CustomDivider,
   CustomRow,
+  CustomSpace,
   CustomSpin,
   CustomStatistic,
   CustomTabs,
+  CustomText,
 } from "@/components/custom"
 import { NextPage } from "next"
 import { Tab } from "rc-tabs/lib/interface"
@@ -73,7 +75,14 @@ const page: NextPage = () => {
                 label: (
                   <CustomRow justify={"space-between"}>
                     <CustomStatistic
-                      title={"Periodo de Nómina"}
+                      title={
+                        <CustomSpace>
+                          Periodo de Nómina
+                          <CustomText type={"secondary"}>
+                            {payrollInfo?.DEDUCTION_INFO}
+                          </CustomText>
+                        </CustomSpace>
+                      }
                       value={payrollInfo.LABEL}
                     />
                     <CustomStatistic

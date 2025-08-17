@@ -165,8 +165,8 @@ const PayrollForm: React.FC<PayrollFormProps> = ({ onFinish }) => {
                 {...labelColFullWidth}
               >
                 <CustomRangePicker
-                  minDate={dateRange.minDate}
-                  maxDate={dateRange.maxDate}
+                  // minDate={dateRange.minDate}
+                  // maxDate={dateRange.maxDate}
                 />
               </CustomFormItem>
             </CustomCol>

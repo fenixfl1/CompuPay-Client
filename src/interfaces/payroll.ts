@@ -95,6 +95,7 @@ export interface PayrollInfo {
   PERIOD_END: string
   INCLUDES_OVERTIME: boolean
   INCLUDES_LEAVES: boolean
+  DEDUCTION_INFO: string
 }
 
 export interface PayrollHistory extends Payroll {

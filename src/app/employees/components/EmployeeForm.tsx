@@ -75,7 +75,7 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ loading }) => {
     form.setFieldsValue({
       ...user,
       BIRTH_DATE: dayjs(user.BIRTH_DATE) as never,
-      ROLES: user.ROLES?.[0]?.ROL_ID as never,
+      ROLE: user.ROLES?.[0]?.ROL_ID as never,
       HIRED_DATE: user?.HIRED_DATE
         ? (dayjs(user?.HIRED_DATE) as any)
         : undefined,
@@ -135,7 +135,7 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ loading }) => {
       }
 
       data.PASSWORD = DEFAULT_PASSWORD
-      data.ROLES = [data.ROLES] as never
+      data.ROLES = user.ROLES.includes(data.ROLE) ? [] : ([data.ROLE] as never)
       data.HIRED_DATE = data.HIRED_DATE.format("YYYY-MM-DD")
       data.BIRTH_DATE = data.BIRTH_DATE.format("YYYY-MM-DD")
       data.STATE = roles.find(
