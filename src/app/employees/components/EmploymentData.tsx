@@ -247,7 +247,7 @@ const EmploymentData: React.FC<EmploymentDataProps> = ({ form }) => {
             </CustomFormItem>
           </CustomCol>
           <CustomDivider>
-            <CustomText>Beneficios e impuestos</CustomText>
+            <CustomText>Deducciones</CustomText>
           </CustomDivider>
           <CustomCol xs={24}>
             <CustomFormItem
