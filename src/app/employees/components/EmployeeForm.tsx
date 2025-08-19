@@ -135,12 +135,14 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ loading }) => {
       }
 
       data.PASSWORD = DEFAULT_PASSWORD
-      data.ROLES = user.ROLES.includes(data.ROLE) ? [] : ([data.ROLE] as never)
+      data.ROLES = user.ROLES?.includes(data.ROLE) ? [] : ([data.ROLE] as never)
       data.HIRED_DATE = data.HIRED_DATE.format("YYYY-MM-DD")
       data.BIRTH_DATE = data.BIRTH_DATE.format("YYYY-MM-DD")
       data.STATE = roles.find(
         (rol) => rol.ROL_ID === (data.ROLES as unknown as number)
       )?.INIT_USER_STATE as string
+
+      delete data.ROLE
 
       if (user?.USER_ID) {
         delete data.IDENTITY_DOCUMENT
