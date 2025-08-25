@@ -262,15 +262,17 @@ const EmploymentData: React.FC<EmploymentDataProps> = ({ form }) => {
                     DEDUCTIONS: Array.from(new Set(values)),
                   })
                 }
-                options={deductions?.map((item) => ({
-                  label: (
-                    <CustomTooltip title={item.LABEL}>
-                      {truncateText(item.LABEL, 60)}
-                    </CustomTooltip>
-                  ),
-                  value: item.DEDUCTION_ID,
-                  style: { width: "100%" },
-                }))}
+                options={deductions
+                  ?.filter((item) => !item.NAME.includes("ISR"))
+                  ?.map((item) => ({
+                    label: (
+                      <CustomTooltip title={item.LABEL}>
+                        {truncateText(item.LABEL, 60)}
+                      </CustomTooltip>
+                    ),
+                    value: item.DEDUCTION_ID,
+                    style: { width: "100%" },
+                  }))}
               />
             </CustomFormItem>
           </CustomCol>
